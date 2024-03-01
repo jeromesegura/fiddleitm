@@ -1,6 +1,6 @@
 # fiddleitm
 
-This is an addon for **mitmproxy** based on EKFiddle (Fiddler extension)
+This is an addon for **mitmproxy** based on [EKFiddle](https://github.com/malwareinfosec/EKFiddle/) (Fiddler extension)
 
 It is used to inspect web traffic (flows) captured by mitmproxy
 and look for malicious indicators from on a list of regexes.
