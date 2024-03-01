@@ -42,7 +42,7 @@ def request(flow):
         request_match = re.search(regex.split('\t')[1], flow.request.path)
         if request_match:
             flow.marked = ":red_circle:"
-            flow.comment = "URL was /evil"
+            flow.comment = regex.split('\t')[0] + " [URI]"
             print(regex.split('\t')[0])
 
 """ Response """
@@ -52,6 +52,6 @@ def response(flow):
             response_match = re.search(regex.split('\t')[1], flow.response.content.decode('utf-8', 'ignore'))
             if response_match:
                 flow.marked = ":red_circle:"
-                flow.comment = "Source code was /evil"
+                flow.comment = regex.split('\t')[0] + " [HTML/JS]"
                 print(regex.split('\t')[0])
 
