@@ -6,8 +6,8 @@ and look for malicious indicators from on a list of regexes.
 
 Usage:
     mitmproxy --scripts fiddleitm.py
-	mitmweb --scripts fiddleitm.py
-	
+    mitmweb --scripts fiddleitm.py
+
 """
 
 import requests
