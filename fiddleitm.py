@@ -1,5 +1,5 @@
 """
-This script is based on EKFiddle https://github.com/malwareinfosec/EKFiddle
+This is an addon for mitmproxy based on EKFiddle (Fiddler extension)
 
 It is used to inspect web traffic (flows) captured by mitmproxy
 and look for malicious indicators from on a list of regexes.
@@ -7,51 +7,56 @@ and look for malicious indicators from on a list of regexes.
 Usage:
     mitmproxy --scripts fiddleitm.py
     mitmweb --scripts fiddleitm.py
-
 """
 
 import requests
 import re
 
-print('EKFiddle v.0.1')
+print('fiddleitm v.0.1')
 
-""" Load regexes """
-print('Loading regexes...')
-session = requests.Session()
-session.trust_env = False
-response = session.get('https://raw.githubusercontent.com/malwareinfosec/EKFiddle/master/Regexes/MasterRegexes.txt')
+class fiddleitm:
 
-URI_data = []
-SourceCode_data = []
+    def __init__(self):
+        """ Load regexes """
+        print('Loading regexes...')
+        session = requests.Session()
+        session.trust_env = False
+        self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/regexes.txt'
+        response = session.get(self.regexes_url)
 
-if (response.status_code):
-    data = response.text
-    for line in (data.split('\r\n')):
-        # Add URI regexes
-        if (line.startswith("URI")):
-            URI_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
-        # Add SourceCode regexes
-        if (line.startswith("SourceCode")):
-            SourceCode_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
+        self.URI_data = []
+        self.SourceCode_data = []
 
-""" Check each incoming flow against regexes """
+        if (response.status_code):
+            data = response.text
+            for line in (data.split('\r\n')):
+                # Add URI regexes
+                if (line.startswith("URI")):
+                    self.URI_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
+                # Add SourceCode regexes
+                if (line.startswith("SourceCode")):
+                    self.SourceCode_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
 
-""" Request """
-def request(flow):
-    for regex in URI_data:
-        request_match = re.search(regex.split('\t')[1], flow.request.path)
-        if request_match:
-            flow.marked = ":red_circle:"
-            flow.comment = regex.split('\t')[0] + " [URI]"
-            print(regex.split('\t')[0])
+    """ Check each incoming flow against regexes """
 
-""" Response """
-def response(flow):
-    if flow.response and flow.response.content:
-        for regex in SourceCode_data:
-            response_match = re.search(regex.split('\t')[1], flow.response.content.decode('utf-8', 'ignore'))
-            if response_match:
+    """ Request """
+    def request(self, flow):
+        for regex in self.URI_data:
+            request_match = re.search(regex.split('\t')[1], flow.request.url)
+            if request_match:
                 flow.marked = ":red_circle:"
-                flow.comment = regex.split('\t')[0] + " [HTML/JS]"
+                flow.comment = regex.split('\t')[0] + " [URI]"
                 print(regex.split('\t')[0])
 
+    """ Response """
+    def response(self, flow):
+        if flow.response and flow.response.content and flow.request.url != self.regexes_url:
+            for regex in self.SourceCode_data:
+                response_match = re.search(regex.split('\t')[1], flow.response.text)
+                if response_match:
+                    flow.marked = ":red_circle:"
+                    flow.comment = regex.split('\t')[0] + " [HTML/JS]"
+                    print(regex.split('\t')[0])
+
+
+addons = [fiddleitm()]
