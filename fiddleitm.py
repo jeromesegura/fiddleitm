@@ -11,6 +11,7 @@ Usage:
 
 import requests
 import re
+import mitmproxy
 
 print('fiddleitm v.0.1')
 
@@ -24,12 +25,16 @@ class fiddleitm:
         self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/regexes.txt'
         response = session.get(self.regexes_url)
 
+        self.IP_data = []
         self.URI_data = []
         self.SourceCode_data = []
 
         if (response.status_code):
             data = response.text
             for line in (data.split('\r\n')):
+                # Add IP regexes
+                if (line.startswith("IP")):
+                    self.IP_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
                 # Add URI regexes
                 if (line.startswith("URI")):
                     self.URI_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
@@ -39,7 +44,16 @@ class fiddleitm:
 
     """ Check each incoming flow against regexes """
 
-    """ Request """
+    """ Check IP address """
+    def server_connected(self, data):
+        for regex in self.IP_data:
+            ip_match = re.search(regex.split('\t')[1], data.server.peername[0])
+            if ip_match:
+                #flow.marked = ":red_circle:"
+                #flow.comment = regex.split('\t')[0] + " [IP]"
+                print(regex.split('\t')[0])
+
+    """ Check request URI """
     def request(self, flow):
         for regex in self.URI_data:
             request_match = re.search(regex.split('\t')[1], flow.request.url)
@@ -48,15 +62,16 @@ class fiddleitm:
                 flow.comment = regex.split('\t')[0] + " [URI]"
                 print(regex.split('\t')[0])
 
-    """ Response """
+    """ Check response content """
     def response(self, flow):
-        if flow.response and flow.response.content and flow.request.url != self.regexes_url:
-            for regex in self.SourceCode_data:
-                response_match = re.search(regex.split('\t')[1], flow.response.text)
-                if response_match:
-                    flow.marked = ":red_circle:"
-                    flow.comment = regex.split('\t')[0] + " [HTML/JS]"
-                    print(regex.split('\t')[0])
-
+        if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
+           flow.request.url != self.regexes_url:
+            if "text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]:
+                for regex in self.SourceCode_data:
+                    response_match = re.search(regex.split('\t')[1], flow.response.text)
+                    if response_match:
+                        flow.marked = ":red_circle:"
+                        flow.comment = regex.split('\t')[0] + " [HTML/JS]"
+                        print(regex.split('\t')[0])
 
 addons = [fiddleitm()]
