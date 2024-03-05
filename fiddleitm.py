@@ -33,6 +33,7 @@ class fiddleitm:
         if (response.status_code):
             data = response.text
             for line in (data.split('\r\n')):
+                line = line.rstrip('\n')
                 # Add IP regexes
                 if (line.startswith("IP")):
                     self.IP_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
