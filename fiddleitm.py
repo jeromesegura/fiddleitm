@@ -57,11 +57,14 @@ class fiddleitm:
     """ flow response """
     def response(self, flow):
         """ Check IP address """
-        for regex in self.IP_data:
-            ip_match = re.search(regex.split('\t')[1], flow.server_conn.peername[0])
-            if ip_match:
-                """ Call mark_flow function """
-                self.mark_flow(flow, regex, "[IP]")
+        server_IP = flow.server_conn.peername[0]
+        if (server_IP):
+            for regex in self.IP_data:
+                if (server_IP):
+                    ip_match = re.search(regex.split('\t')[1], server_IP)
+                    if ip_match:
+                        """ Call mark_flow function """
+                        self.mark_flow(flow, regex, "[IP]")
         """ Check response content """
         if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
            flow.request.pretty_url != self.regexes_url:
