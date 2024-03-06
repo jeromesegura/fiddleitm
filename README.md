@@ -5,10 +5,15 @@ This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) bas
 It is used to inspect web traffic (flows) captured by mitmproxy
 and look for malicious indicators from on a list of regexes.
 
-Usage:
+**Usage:**
 
-* mitmproxy --scripts fiddleitm.py
-* mitmweb --scripts fiddleitm.py
+To launch the command line interface:
+
+`mitmproxy --scripts fiddleitm.py`
+
+To launch the web interface:
+
+`mitmweb --scripts fiddleitm.py`
 
 ![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
 
