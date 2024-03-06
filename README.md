@@ -1,4 +1,4 @@
-# fiddleitm
+# fiddleitm v.0.1
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) based on [EKFiddle](https://github.com/malwareinfosec/EKFiddle/) (Fiddler extension)
 
