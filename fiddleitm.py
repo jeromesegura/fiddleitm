@@ -14,6 +14,7 @@ import re
 import mitmproxy
 from mitmproxy import http
 from mitmproxy.addonmanager import Loader
+import random
 
 print('fiddleitm v.0.1')
 
@@ -66,7 +67,16 @@ class Fiddleitm:
         """ Loop through list of keywords to replace """
         for keyword in self.anti_vm_list:
             if keyword in request_response:
-                modified_request_response = request_response.replace(keyword, "Intel")
+                # Replace with random word from list
+                session = requests.Session()
+                session.trust_env = False
+                word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
+                response = session.get(word_site)
+                bytelist = response.content.splitlines()
+                stringlist = [x.decode('utf-8') for x in bytelist]
+                random_word = random.choice(stringlist)
+                print('Fingerprinting detected, replacing data in POST request with keyword: ' + random_word)
+                modified_request_response = request_response.replace(keyword, random_word)
                 break
         return modified_request_response
 
@@ -90,6 +100,8 @@ class Fiddleitm:
         """ Do anti-vm """
         if self.do_anti_vm:
             flow.request.text = self.anti_vm(flow)
+            # Setting setting to false
+            self.do_anti_vm = False
         for regex in self.URI_data:
             request_match = re.search(regex.split('\t')[1], flow.request.pretty_url)
             if request_match:
