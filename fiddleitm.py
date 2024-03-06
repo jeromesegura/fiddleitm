@@ -54,11 +54,14 @@ class fiddleitm:
                 """ Call mark_flow function """
                 self.mark_flow(flow, regex, "[URI]")
 
-    """ flow response """
+    """ flow response """ 
     def response(self, flow):
         """ Check IP address """
-        server_IP = flow.server_conn.peername[0]
-        if (server_IP):
+        try:
+            server_IP = flow.server_conn.peername[0]
+        except:
+            server_IP = None
+        if server_IP is not None:
             for regex in self.IP_data:
                 if (server_IP):
                     ip_match = re.search(regex.split('\t')[1], server_IP)
