@@ -1,5 +1,5 @@
 """
-This is an addon for mitmproxy based on EKFiddle (Fiddler extension)
+This is an addon for mitmproxy based on EKFiddle (Fiddler extension).
 
 It is used to inspect web traffic (flows) captured by mitmproxy
 and look for malicious indicators from on a list of regexes.
@@ -13,22 +13,29 @@ import requests
 import re
 import mitmproxy
 from mitmproxy import http
+from mitmproxy.addonmanager import Loader
 
 print('fiddleitm v.0.1')
 
-class fiddleitm:
+class Fiddleitm:
 
     def __init__(self):
+        """ Initialize variables """
+        self.IP_data = []
+        self.URI_data = []
+        self.SourceCode_data = []
+        self.anti_vm_list = [
+            "VMware", "vmtoolsd", "VMwareService", "Vmwaretray", "vm3dservice",
+            "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService"
+            "VBoxTray", "Fiddler", "FSE2"
+        ]
+        self.do_anti_vm = False
         """ Load regexes """
         print('Loading regexes...')
         session = requests.Session()
         session.trust_env = False
         self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/regexes.txt'
         response = session.get(self.regexes_url)
-
-        self.IP_data = []
-        self.URI_data = []
-        self.SourceCode_data = []
 
         if (response.status_code):
             data = response.text
@@ -44,23 +51,55 @@ class fiddleitm:
                 if (line.startswith("SourceCode")):
                     self.SourceCode_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
 
-    """ Check each incoming flow against regexes """
+    ## Get remote server IP address
+    def get_serverIP(self, flow):
+        try:
+            server_IP = flow.server_conn.peername[0]
+        except:
+            server_IP = None
+        return server_IP
 
-    """ flow request """
+    ## anti-vm
+    def anti_vm(self, flow):
+        request_response = flow.request.text
+        modified_request_response = request_response
+        """ Loop through list of keywords to replace """
+        for keyword in self.anti_vm_list:
+            if keyword in request_response:
+                modified_request_response = request_response.replace(keyword, "Intel")
+                break
+        return modified_request_response
+
+    ## Mark flows
+    def mark_flow(self, flow, regex, type):
+        """ Play sound """
+        print('\a')
+        """ Print detection name in console """
+        print(regex.split('\t')[0] + " " + type)
+        """ Mark flow in web UI """
+        flow.marked = ":red_circle:"
+        flow.comment = regex.split('\t')[0] + " " + type
+        """ Check if anti-vm detection was detected """
+        if "Fingerprinting" in flow.comment:
+            self.do_anti_vm = True
+        else:
+            self.do_anti_vm = False
+
+    ## flow request
     def request(self, flow):
+        """ Do anti-vm """
+        if self.do_anti_vm:
+            flow.request.text = self.anti_vm(flow)
         for regex in self.URI_data:
             request_match = re.search(regex.split('\t')[1], flow.request.pretty_url)
             if request_match:
                 """ Call mark_flow function """
                 self.mark_flow(flow, regex, "[URI]")
 
-    """ flow response """ 
+    ## flow response
     def response(self, flow):
         """ Check IP address """
-        try:
-            server_IP = flow.server_conn.peername[0]
-        except:
-            server_IP = None
+        server_IP = self.get_serverIP(flow)
         if server_IP is not None:
             for regex in self.IP_data:
                 if (server_IP):
@@ -77,14 +116,5 @@ class fiddleitm:
                     if response_match:
                         """ Call mark_flow function """
                         self.mark_flow(flow, regex, "[HTML/JS]")
-                        
-    def mark_flow(self, flow, regex, type):
-        """ Play sound """
-        print('\a')
-        """ Print detection name in console """
-        print(regex.split('\t')[0] + " " + type)
-        """ Mark flow in web UI """
-        flow.marked = ":red_circle:"
-        flow.comment = regex.split('\t')[0] + " " + type
 
-addons = [fiddleitm()]
+addons = [Fiddleitm()]
