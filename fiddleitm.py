@@ -9,6 +9,7 @@ Usage:
     mitmweb --scripts fiddleitm.py
 """
 
+import os
 import requests
 import re
 import mitmproxy
@@ -32,25 +33,38 @@ class Fiddleitm:
         ]
         self.do_anti_vm = False
         """ Load regexes """
-        print('Loading regexes...')
+        """ master regexes """
+        print('Loading master regexes...')
         session = requests.Session()
         session.trust_env = False
         self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/regexes.txt'
         response = session.get(self.regexes_url)
 
         if (response.status_code):
-            data = response.text
-            for line in (data.split('\r\n')):
-                line = line.rstrip('\n')
-                # Add IP regexes
-                if (line.startswith("IP")):
-                    self.IP_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
-                # Add URI regexes
-                if (line.startswith("URI")):
-                    self.URI_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
-                # Add SourceCode regexes
-                if (line.startswith("SourceCode")):
-                    self.SourceCode_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
+            data = response.text.split('\r\n')
+            self.add_regex_list(data)
+        print(' -> master regexes loaded successfully')
+
+        """ local regexes """
+        if os.path.isfile('local_regexes.txt'):
+            print('Loading local regexes...')
+            with open('local_regexes.txt', 'r') as file:
+                data = file.read().splitlines()
+                self.add_regex_list(data)
+                print(' -> local regexes loaded successfully')
+
+    def add_regex_list(self, data):
+        for line in data:
+            line = line.rstrip('\n')
+            ## Add IP regexes
+            if (line.startswith("IP")):
+                self.IP_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
+            # Add URI regexes
+            if (line.startswith("URI")):
+                self.URI_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
+            # Add SourceCode regexes
+            if (line.startswith("SourceCode")):
+                self.SourceCode_data.append(line.split('\t')[1] + ('\t') + line.split('\t')[2])
 
     ## Get remote server IP address
     def get_serverIP(self, flow):
