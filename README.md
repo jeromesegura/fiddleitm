@@ -31,6 +31,12 @@ Currently, fiddleitm inspects the following:
 
 A list of regexes ([regexes.txt](https://github.com/malwareinfosec/fiddleitm/blob/main/regexes.txt)) is used to parse incoming flows and identify any match with existing regexes.
 
+You can use your own regexes as well. Simply create a file called ``local_regexes.txt`` in the same path as fiddleitm.py.
+
+Accepted format: ``{Type} TAB {Regex name} TAB {Regex}``
+
+where Type can be: ``IP/URI/SourceCode``
+
 Flows that match a regex are marked and commented in real time and a system sound will play.
 
 ## Anti-VM detection and evasion
