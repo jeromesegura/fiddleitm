@@ -1,6 +1,6 @@
 ## Regular expressions for mitmproxy
 ## To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-## Last updated: 2024-03-06
+## Last updated: 2024-03-21
 
 ## Social engineering (malware)
 SourceCode	SocGholish (injected site)	src=\w{2}\('\w{11}\:\w\/\w\/	https://blog.malwarebytes.com/threat-analysis/2018/04/fakeupdates-campaign-leverages-multiple-website-platforms/
@@ -20,7 +20,7 @@ SourceCode	Parrot TDS (NDSW) cookie	var\sndsx\s=\strue.*cookie
 SourceCode	FakeSG/RogueRaticate (compromised site)	(f=1135333.*vhe;>heha)	https://www.malwarebytes.com/blog/threat-intelligence/2023/07/socgholish-copycat-delivers-netsupport-rat
 SourceCode	FakeSG/RogueRaticate (payload)	(\).url'.*setTimeout.*atob\()
 SourceCode	SmartApeSG (injection)	\/cdn\-vs\/get.php"><\/script>
-SourceCode	SmartApeSG (iframe)	w.php\?reqtime= *AND* sAyOE
+SourceCode	SmartApeSG (iframe)	sAyOE.*sAyOE
 Headers	SmartApeSG2 (301 redirect)	cdn3\-jquery\.info
 URI	SmartApeSG2	telotrace\.com\/	https://infosec.exchange/@GustyDusty/111176105257032772
 URI	SmartApeSG2 (payload)	mamagoocha\.com\/
