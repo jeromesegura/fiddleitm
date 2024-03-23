@@ -15,10 +15,6 @@ To launch the web interface:
 
 `mitmweb --scripts fiddleitm.py`
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
-
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/ff8e17a0-5288-467f-a71c-4f5c5c49bde1)
-
 # Features
 
 ## Malicious traffic detection based on regexes
@@ -48,6 +44,10 @@ Match **all** of the conditions
 Match **any** of the conditions
 
 ``SourceCode TAB {Regex name} TAB {Regex1} *OR* {Regex2}``
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/ff8e17a0-5288-467f-a71c-4f5c5c49bde1)
 
 ## Anti-VM detection and evasion
 
