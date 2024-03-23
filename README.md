@@ -39,6 +39,16 @@ where Type can be: ``IP/URI/SourceCode``
 
 Flows that match a regex are marked and commented in real time and a system sound will play.
 
+*Advanced syntax:*
+
+Match **all** of the conditions
+
+``SourceCode TAB {Regex name} TAB {Regex1} *AND* {Regex2} *AND* {Regex3} *AND* {Regex4}``
+
+Match **any** of the conditions
+
+``SourceCode TAB {Regex name} TAB {Regex1} *OR* {Regex2}``
+
 ## Anti-VM detection and evasion
 
 Threat actors can use JavaScript code to fingerprint visitors and detect if they are running a virtual machine (VMware, VirtualBox). In some instances, this works by collecting information such as video drivers, renders, etc. and then sending that information backed to the server via a POST request.
