@@ -31,7 +31,7 @@ class Fiddleitm:
             "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService"
             "VBoxTray", "Fiddler", "FSE2"
         ]
-        self.do_anti_vm = False
+        self.do_anti_vm = False #
         """ Load regexes """
         """ master regexes """
         print('Loading master regexes...')
@@ -133,12 +133,39 @@ class Fiddleitm:
                     if ip_match:
                         """ Call mark_flow function """
                         self.mark_flow(flow, regex, "[IP]")
+
         """ Check response content """
         if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
            flow.request.pretty_url != self.regexes_url:
             if "text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]:
+                response_match = False
                 for regex in self.SourceCode_data:
-                    response_match = re.search(regex.split('\t')[1], flow.response.text)
+                    """ Check regex type """
+                    # regex contains *AND*
+                    if (" *AND* " in regex):
+                        # split regex into subregexes #
+                        subregexesList = regex.split('\t')[1].split(" *AND* ")
+                        for subregex in subregexesList:
+                            if subregex not in flow.response.text:
+                                # Not all search terms were found
+                                response_match = False
+                                break
+                            response_match = True
+                    # regex contains *OR*
+                    elif (" *OR* " in regex):
+                        # split regex into subregexes #
+                        subregexesList = regex.split('\t')[1].split(" *OR* ")
+                        for subregex in subregexesList:
+                            if subregex in flow.response.text:
+                                # At least one term was found
+                                response_match = True
+                                break
+                            response_match = False
+                    else:
+                        # simple regex #
+                        response_match = re.search(regex.split('\t')[1], flow.response.text)
+
+                    # check if we have a match
                     if response_match:
                         """ Call mark_flow function """
                         self.mark_flow(flow, regex, "[HTML/JS]")
