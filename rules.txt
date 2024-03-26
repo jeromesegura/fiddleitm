@@ -4,8 +4,10 @@
 
 # Social engineering (malware)
 SourceCode	FakeDomen	$string="domen" *AND* $string="detecct" *AND* $string="linkDesktop"
+URI	SocGholish	$regex="^http(s|):\/\/(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/(?![a-z]{5}\/)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*(=|\+))(?!.*(\-|_|\.|%|\?|@|[a-z]{6}|[0-9]{6}|aHR0cHM|api|app)).{40,140}="
 
 # Social engineering (scams)
+URI	Balada injector (json)	$string="base64eJyrVkrLzClJLVKyUqqOUc
 
 # Obfuscation
 

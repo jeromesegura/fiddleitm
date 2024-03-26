@@ -39,7 +39,7 @@ class Fiddleitm:
         print('Loading master regexes...')
         session = requests.Session()
         session.trust_env = False
-        self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/regexes.txt'
+        self.regexes_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
         response = session.get(self.regexes_url)
 
         if response.status_code:
@@ -49,7 +49,6 @@ class Fiddleitm:
 
         """ local rules """
         if os.path.isfile('local_rules.txt'):
-            print('Loading local rules...')
             with open('local_rules.txt', 'r') as file:
                 data = file.read().splitlines()
                 self.add_regex_list(data)
@@ -125,11 +124,21 @@ class Fiddleitm:
             flow.request.text = self.anti_vm(flow)
             # Setting setting to false
             self.do_anti_vm = False
-        for regex in self.URI_data:
-            request_match = re.search(regex.split('\t')[1], flow.request.pretty_url)
+        # simple rule #
+        # check rule type (string or regex)
+        for rule in self.URI_data:
+            condition = rule.split('\t')[1]
+            condition_type = self.check_conditiontype(flow.request.pretty_url, condition)
+            if condition_type == "string":
+                condition_string = condition.replace('$string="', '')[:-1]
+                if condition_string in flow.request.pretty_url:
+                    request_match = True
+            elif condition_type == "regex":
+                condition_string = condition.replace('$regex="', '')[:-1]
+                request_match = re.search(condition_string, flow.request.pretty_url)
             if request_match:
                 """ Call mark_flow function """
-                self.mark_flow(flow, regex, "[URI]")
+                self.mark_flow(flow, rule, "[URI]")
 
     # flow response
     def response(self, flow):

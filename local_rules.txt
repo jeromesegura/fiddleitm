@@ -1,0 +1,14 @@
+# Add your own rules here
+# Syntax:
+# Accepted format: {Type} TAB {Rule name} TAB {Condition}
+#  where Type can be: IP/URI/SourceCode
+#  where Condition can be: $string="" or $regex=""
+#
+# Advanced syntax:
+#  All the conditions: SourceCode TAB {Rule name} TAB {Condition 1} *AND* {Condition 2}
+#  Any of the conditions: SourceCode TAB {Rule name} TAB {Condition 1} *AND* {Condition 2}
+#
+# Examples:
+# URI	Google home page	$string="google.com"
+# SourceCode	MYRULE	$string="hello" *AND* $string="world"
+# IP	MYRULE2	$string="8.8.8.8" *OR* $string="8.8.4.4"
