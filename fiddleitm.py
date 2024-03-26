@@ -29,8 +29,8 @@ class Fiddleitm:
         self.SourceCode_data = []
         self.anti_vm_list = [
             "VMware", "vmtoolsd", "VMwareService", "Vmwaretray", "vm3dservice",
-            "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService"
-                                                                          "VBoxTray", "Fiddler", "FSE2"
+            "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService",
+            "VBoxTray", "Fiddler", "FSE2"
         ]
         self.do_anti_vm = False
         rule_type = ""
