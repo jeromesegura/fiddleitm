@@ -40,7 +40,7 @@ Flows that match a rule are marked and commented in real time and a system sound
 
 Match **all** of the conditions
 
-``SourceCode TAB {Rule name} TAB {Condition 1} *AND* {Condtion 2}``
+``SourceCode TAB {Rule name} TAB {Condition 1} *AND* {Condition 2}``
 
 Match **any** of the conditions
 
