@@ -154,7 +154,7 @@ class Fiddleitm:
 
         """ Check response content """
         if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-                flow.request.pretty_url != self.regexes_url:
+                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url:
             if "text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]:
                 response_match = False
 
