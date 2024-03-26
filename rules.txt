@@ -1,0 +1,18 @@
+# Rules for mitmproxy
+# To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
+# Last updated: 2024-03-22
+
+# Social engineering (malware)
+SourceCode	FakeDomen	$string="domen" *AND* $string="detecct" *AND* $string="linkDesktop"
+
+# Social engineering (scams)
+
+# Obfuscation
+
+# CVEs
+
+# Suspicious traffic
+
+# C2s
+
+# Misc
