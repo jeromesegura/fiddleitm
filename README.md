@@ -19,32 +19,33 @@ To launch the web interface:
 
 ## Malicious traffic detection based on rules
 
-Currently, fiddleitm inspects the following:
+Currently, **fiddleitm** inspects the following:
 
 * remote server IP address
 * remote host URI
 * response content
 
-A list of rules ([regexes.txt](https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt)) is used to parse incoming flows and identify any match with existing rules.
+Predefined [rules](https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
 
-You can use your own rules as well. Simply create a file called ``local_rules.txt`` in the same path as fiddleitm.py.
+You can add your own rules to a file called ``local_rules.txt`` placed in the same directory as ``fiddleitm.py``.
 
-Accepted format: ``{Type} TAB {Rule name} TAB {Condition}``
+**Syntax for rules:**
 
-where Type can be: ``IP/URI/SourceCode``
-where Condition can be: ``$string="" or $regex=""``
+``rule_name:"rule name"; "condition 1"; "condition 2"; "condition n"``
 
-Flows that match a rule are marked and commented in real time and a system sound will play.
+**List of conditions:**
 
-*Advanced syntax:*
+* ``hostname:"string"``
 
-Match **all** of the conditions
+* ``server_ip:"string"``
 
-``SourceCode TAB {Rule name} TAB {Condition 1} *AND* {Condition 2}``
+* ``content:"string"``
 
-Match **any** of the conditions
+* ``url_regex:"regex"``
 
-``SourceCode TAB {Rule name} TAB {Condition 1} *OR* {Condition 2}``
+* ``response_body_regex:"regex"``
+
+You can add multiple conditions of the same type (i.e. ``rule_name:"my rule"; content:"text1"; content"text2"``).
 
 ![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
 
