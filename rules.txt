@@ -1,20 +1,9 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-03-22
+# Last updated: 2024-03-29
 
 # Social engineering (malware)
-SourceCode	FakeDomen	$string="domen" *AND* $string="detecct" *AND* $string="linkDesktop"
-URI	SocGholish	$regex="^http(s|):\/\/(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/(?![a-z]{5}\/)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*(=|\+))(?!.*(\-|_|\.|%|\?|@|[a-z]{6}|[0-9]{6}|aHR0cHM|api|app)).{40,140}="
+rule_name:"FakeDomen"; content:"domen"; content:"detecct"; content:"linkDesktop"
 
 # Social engineering (scams)
-URI	Balada injector (json)	$string="base64eJyrVkrLzClJLVKyUqqOUc
-
-# Obfuscation
-
-# CVEs
-
-# Suspicious traffic
-
-# C2s
-
-# Misc
+rule_name:"Balada injector (json); content:"base64eJyrVkrLzClJLVKyUqqOUc"
