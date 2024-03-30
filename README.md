@@ -35,11 +35,11 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 **List of conditions:**
 
-* ``hostname:"string"``
+* ``host_name_string:"string"``
 
-* ``server_ip:"string"``
+* ``host_ip_string:"string"``
 
-* ``content:"string"``
+* ``response_body_string:"string"``
 
 * ``url_regex:"regex"``
 
