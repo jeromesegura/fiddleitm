@@ -45,7 +45,7 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 * ``response_body_regex:"//"``
 
-You can add multiple conditions of the same type (i.e. ``rule_name:"my rule"; content:"text1"; content"text2"``).
+You can add multiple conditions of the same type (i.e. ``rule_name:"my rule"; response_body_string:"text1"; response_body_string"text2"``).
 
 ![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
 
