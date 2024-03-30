@@ -6,4 +6,4 @@
 rule_name:"FakeDomen"; content:"domen"; content:"detecct"; content:"linkDesktop"
 
 # Social engineering (scams)
-rule_name:"Balada injector (json); content:"base64eJyrVkrLzClJLVKyUqqOUc"
+rule_name:"Balada injector (json)"; content:"base64eJyrVkrLzClJLVKyUqqOUc"
