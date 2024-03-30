@@ -35,15 +35,15 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 **List of conditions:**
 
-* ``host_name_string:"string"``
+* ``host_name_string:""``
 
-* ``host_ip_string:"string"``
+* ``host_ip_string:""``
 
-* ``response_body_string:"string"``
+* ``response_body_string:""``
 
-* ``url_regex:"regex"``
+* ``url_regex:"//"``
 
-* ``response_body_regex:"regex"``
+* ``response_body_regex:"//"``
 
 You can add multiple conditions of the same type (i.e. ``rule_name:"my rule"; content:"text1"; content"text2"``).
 
