@@ -35,11 +35,14 @@ import mitmproxy
 from mitmproxy import http
 from mitmproxy.addonmanager import Loader
 import random
+from datetime import datetime
+import logging
 
 class Fiddleitm:
     def __init__(self):
+        version_local = "0.1"
         print('#################')
-        print(' fiddleitm v.0.1')
+        print(' fiddleitm v.' + version_local)
         print('#################')
         # Initialize variables
         self.rules = []
@@ -49,8 +52,20 @@ class Fiddleitm:
             "VBoxTray", "Fiddler", "FSE2"
         ]
         self.do_anti_vm = False
+        # Check for update
+        session = requests.Session()
+        session.trust_env = False
+        read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
+        response = session.get(read_version)
+        if response.status_code:
+            try:
+                version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
+                if version_local != version_online:
+                    print('A new version of fiddleitm is available!')
+            except Exception:
+                logging.error("Failed to read fiddleitm version")
         # Load main rules
-        print('Loading main rules...')
+        logging.info("Loading main rules...")
         session = requests.Session()
         session.trust_env = False
         self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
@@ -58,14 +73,14 @@ class Fiddleitm:
         if response.status_code:
             rules = response.text.split('\r\n')
             self.add_rules_list(rules)
-        print(' -> master rules loaded successfully')
+        logging.info(" -> master rules loaded successfully")
         # Load local rules
-        print('Loading local rules...')
+        logging.info("Loading local rules...")
         if os.path.isfile('local_rules.txt'):
             with open('local_rules.txt', 'r') as file:
                 rules = file.read().splitlines()
                 self.add_rules_list(rules)
-                print(' -> local rules loaded successfully')
+                logging.info(" -> local rules loaded successfully")
 
     """ Add remote and local rules """
     def add_rules_list(self, rules):
@@ -188,6 +203,15 @@ class Fiddleitm:
         # Mark flow in web UI
         flow.marked = ":red_circle:"
         flow.comment = rule_name
+        # Log to file
+        get_referer = flow.request.headers.get("referer")
+        if get_referer is not None:
+            referer = get_referer
+        else:
+            referer = 'N/A'
+        with open("rules.log", 'a') as rules_log:
+            date_time = datetime.now().strftime("%m/%d/%Y %H:%M")
+            rules_log.write(date_time + ',' + rule_name + ',' + flow.request.pretty_url + ',' + referer + '\n')
         # Check if anti-vm was detected
         if "Fingerprinting" in flow.comment:
             self.do_anti_vm = True
