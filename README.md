@@ -21,9 +21,10 @@ To launch the web interface:
 
 Currently, **fiddleitm** inspects the following:
 
-* remote server IP address
-* remote host URI
-* response content
+* remote host name IP address
+* remote host IP address
+* remote host full URL
+* response body
 
 Predefined [rules](https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
 
@@ -39,9 +40,9 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 * ``host_ip = "string"`` or ``host_ip = /regex/``
 
-* ``response_body = "string"`` or ``response_body = /regex/``
-
 * ``full_url = "string"`` or ``full_url = /regex/``
+
+* ``response_body = "string"`` or ``response_body = /regex/``
 
 You can add multiple conditions of the same type (i.e. ``rule_name = "my rule"; response_body = "text1"; response_body = "text2"``).
 
