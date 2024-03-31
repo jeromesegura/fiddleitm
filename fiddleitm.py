@@ -25,7 +25,6 @@ Syntax for rules:
     response_body_regex:"regex"
 
 You can add multiple conditions of the same type (i.e. content:"text1"; content"text2").
-
 """
 
 import os
@@ -61,7 +60,7 @@ class Fiddleitm:
             try:
                 version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
                 if version_local != version_online:
-                    print('A new version of fiddleitm is available!')
+                    print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
             except Exception:
                 logging.error("Failed to read fiddleitm version")
         # Load main rules
@@ -72,7 +71,7 @@ class Fiddleitm:
         response = session.get(self.rules_url)
         if response.status_code:
             rules = response.text.split('\r\n')
-            self.add_rules_list(rules)
+            #self.add_rules_list(rules)
         logging.info(" -> master rules loaded successfully")
         # Load local rules
         logging.info("Loading local rules...")
@@ -118,78 +117,119 @@ class Fiddleitm:
             # split rule into multiple conditions
             conditions_list = rule.split("; ")
             for condition in conditions_list:
-                #rule_name = conditions_list[0].strip("rulename:").strip('"')
-                if "rule_name:" in condition:
-                    rule_name = condition.strip("rule_name:").strip('"')
-                if "hostname:" in condition:
-                    hostname = condition.strip("hostname:").strip('"')
-                    matched_condition = self.check_hostname(flow, rule_name, hostname)
+                if "rule_name = \"" in condition:
+                    rule_name = condition.strip("rule_name = ").strip('"')
+                if "host_name = \"" in condition:
+                    host_name_string = condition.strip("host_name = ").strip('"')
+                    matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
                     if matched_condition == False:
                         break
-                if "server_ip:" in condition:
-                    server_ip = condition.strip("server_ip:").strip('"')
-                    matched_condition = self.check_ip(flow, rule_name, server_ip)
+                if "host_name = /" in condition:
+                    host_name_regex = condition.strip("host_name = /").strip('"')
+                    matched_condition = self.check_hostname_regex(flow, rule_name, host_name_regex)
                     if matched_condition == False:
                         break
-                if "content:" in condition:
-                    content = condition.strip("content:").strip('"')
-                    matched_condition = self.check_content(flow, rule_name, content)
+                if "host_ip = \"" in condition:
+                    host_ip_string = condition.strip("host_ip = ").strip('"')
+                    matched_condition = self.check_host_ip_string(flow, rule_name, host_ip_string)
                     if matched_condition == False:
                         break
-                if "url_regex:" in condition:
-                    url_regex = condition.strip("url_regex:").strip('"')
-                    matched_condition = self.check_url_regex(flow, rule_name, url_regex)
+                if "host_ip = /" in condition:
+                    host_ip_regex = condition.strip("host_ip = /").strip('"')
+                    matched_condition = self.check_host_ip_regex(flow, rule_name, host_ip_regex)
                     if matched_condition == False:
                         break
-                if "response_body_regex:" in condition:
-                    response_body_regex = condition.strip("response_body_regex:").strip('"')
+                if "response_body = \"" in condition:
+                    response_body_string = condition.strip("response_body = ").strip('"')
+                    matched_condition = self.check_response_body_string(flow, rule_name, response_body_string)
+                    if matched_condition == False:
+                        break
+                if "response_body = /" in condition:
+                    response_body_regex = condition.strip("response_body = /").strip('"')
                     matched_condition = self.check_response_body_regex(flow, rule_name, response_body_regex)
                     if matched_condition == False:
                         break
+                if "full_url = \"" in condition:
+                    full_url_string = condition.strip("full_url = ").strip('"')
+                    matched_condition = self.check_full_url_string(flow, rule_name, full_url_string)
+                    if matched_condition == False:
+                        break
+                if "full_url = /" in condition:
+                    full_url_regex = condition.strip("full_url = /").strip('"')
+                    matched_condition = self.check_full_url_regex(flow, rule_name, full_url_regex)
+                    if matched_condition == False:
+                        break
+
             # check if we have a match for all conditions
             if matched_condition:
                 # Call mark_flow function
                 self.mark_flow(flow, rule_name)
 
-    """ Check for hostname condition """
-    def check_hostname(self, flow, rule_name, hostname):
-        if hostname in flow.request.host:
+    """ Check for hostname condition (string) """
+    def check_hostname_string(self, flow, rule_name, host_name_string):
+        if host_name_string in flow.request.host:
             return True
         else:
             return False
 
-    """ Check for IP address condition """
-    def check_ip(self, flow, rule_name, server_ip):
+    """ Check for hostname condition (regex) """
+    def check_hostname_regex(self, flow, rule_name, host_name_regex):
+        if re.search(host_name_regex, flow.request.pretty_url):
+            return True
+        else:
+            return False
+
+    """ Check for IP address condition (string) """
+    def check_host_ip_string(self, flow, rule_name, host_ip_string):
         try:
-            if server_ip in flow.server_conn.peername[0]:
+            if host_ip_string in flow.server_conn.peername[0]:
                 return True
             else:
                 return False
         except Exception:
             return False
 
-    """ Check for content in response body condition """
-    def check_content(self, flow, rule_name, content):
+    """ Check for IP address condition (regex) """
+    def check_host_ip_regex(self, flow, rule_name, host_ip_regex):
+        try:
+            if re.search(host_ip_regex, flow.server_conn.peername[0]):
+                return True
+            else:
+                return False
+        except Exception:
+            return False
+
+    """ Check for response body condition (string) """
+    def check_response_body_string(self, flow, rule_name, response_body_string):
         # Only check if response exists and matches content-type
         if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
             "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
             ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
-
-            if content in flow.response.text:
+            if response_body_string in flow.response.text:
+                return True
+            else:
+                return False
+    """ Check for response body condition (regex) """
+    def check_response_body_regex(self, flow, rule_name, response_body_regex):
+        # Only check if response exists and matches content-type
+        if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
+            "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
+            ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
+            if re.search(response_body_regex, flow.response.text):
                 return True
             else:
                 return False
 
-    """ Check for regex in URL condition """
-    def check_url_regex(self, flow, rule_name, url_regex):
-        if re.search(url_regex, flow.request.pretty_url):
+    """ Check for full URL condition (string) """
+    def check_full_url_string(self, flow, rule_name, full_url_string):
+        if full_url_string in flow.request.pretty_url:
             return True
         else:
             return False
 
-    """ Check for regex in response content condition """
-    def check_response_body_regex(self, flow, rule_name, response_body_regex):
-        if re.search(response_body_regex, flow.response.text):
+    """ Check for full URL condition (regex) """
+    def check_full_url_regex(self, flow, rule_name, full_url_regex):
+        if re.search(full_url_regex, flow.request.pretty_url):
             return True
         else:
             return False
