@@ -3,7 +3,7 @@
 # Last updated: 2024-03-29
 
 # Social engineering (malware)
-rule_name:"FakeDomen"; content:"domen"; content:"detecct"; content:"linkDesktop"
+rule_name:"FakeDomen"; response_body_string:"domen"; response_body_string:"detecct"; response_body_string:"linkDesktop"
 
 # Social engineering (scams)
-rule_name:"Balada injector (json)"; content:"base64eJyrVkrLzClJLVKyUqqOUc"
+rule_name:"Balada injector (json)"; url_regex:"/base64eJyrVkrLzClJLVKyUqqOUc/"
