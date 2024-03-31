@@ -36,13 +36,13 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 **List of conditions:**
 
-* ``host_name = "string"`` or ``host_name = /regex/``
+* ``host_name = `` ``"string"`` or ``/regex/``
 
-* ``host_ip = "string"`` or ``host_ip = /regex/``
+* ``host_ip = `` ``"string"`` or ``/regex/``
 
-* ``full_url = "string"`` or ``full_url = /regex/``
+* ``full_url = `` ``"string"`` or ``/regex/``
 
-* ``response_body = "string"`` or ``response_body = /regex/``
+* ``response_body = `` ``"string"`` or ``/regex/``
 
 **Example**
 
