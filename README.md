@@ -31,19 +31,19 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 **Syntax for rules:**
 
-``rule_name:"rule name"; "condition 1"; "condition 2"; "condition n"``
+``rule_name = "rule name"; "condition 1"; "condition 2"; "condition n"``
 
 **List of conditions:**
 
-* ``host_name:"string"`` or ``host_name:"/regex/"``
+* ``host_name = "string"`` or ``host_name = /regex/``
 
-* ``host_ip:"string"`` or ``host_ip:"/regex/"``
+* ``host_ip = "string"`` or ``host_ip = /regex/``
 
-* ``response_body:"string"`` or ``response_body:"/regex/"``
+* ``response_body = "string"`` or ``response_body = /regex/``
 
-* ``full_url:"string"`` or ``full_url:"/regex/"``
+* ``full_url = "string"`` or ``full_url = /regex/``
 
-You can add multiple conditions of the same type (i.e. ``rule_name:"my rule"; response_body:"text1"; response_body:"text2"``).
+You can add multiple conditions of the same type (i.e. ``rule_name = "my rule"; response_body = "text1"; response_body = "text2"``).
 
 ![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
 
