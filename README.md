@@ -32,17 +32,17 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 **Syntax for rules:**
 
-``rule_name = "rule name"; "condition 1"; "condition 2"; "condition n"``
+``rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...``
 
 **List of conditions:**
 
-* ``host_name = `` ``"string"`` or ``/regex/``
+* ``host_name``
 
-* ``host_ip = `` ``"string"`` or ``/regex/``
+* ``host_ip``
 
-* ``full_url = `` ``"string"`` or ``/regex/``
+* ``full_url``
 
-* ``response_body = `` ``"string"`` or ``/regex/``
+* ``response_body``
 
 **Example**
 
