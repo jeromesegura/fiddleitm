@@ -20,6 +20,8 @@ To launch the command-line version of mitmproxy (useful for capturing a lot of t
 
 Options:
 
+* modify default user-agent with your own (reads first line from *useragent.txt*) ``--set customuseragent=true``
+
 * log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
 
 * add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
@@ -37,7 +39,7 @@ Currently, **fiddleitm** inspects the following:
 
 Predefined [rules](https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
 
-You can add your own rules to a file called ``local_rules.txt`` placed in the same directory as ``fiddleitm.py``.
+You can add your own rules to a file called ``localrules.txt`` placed in the same directory as ``fiddleitm.py``.
 
 **Syntax for rules:**
 
