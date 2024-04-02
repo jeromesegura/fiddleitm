@@ -22,6 +22,8 @@ Options:
 
 * log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
 
+* add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
+
 # Features
 
 ## Malicious traffic detection based on rules
