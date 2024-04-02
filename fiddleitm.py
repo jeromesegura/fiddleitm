@@ -17,7 +17,7 @@ Options:
 
 Predefined rules (rules.txt) are loaded from the GitHub repository.
 
-You can add your own rules to a file called local_rules.txt placed in the same
+You can add your own rules to a file called localrules.txt placed in the same
 directory as fiddleitm.py
 
 Syntax for rules:
@@ -83,19 +83,22 @@ class Fiddleitm:
             rules = response.text.split('\r\n')
             # Get rules date
             rules_date = re.findall(r'Last updated:\s.+', response.text)[0][10:24]
-            print('Hsdfd ' + rules_date)
             rules_counter = self.add_rules_list(rules)
         logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
         # Load local rules
         logging.info("Loading local rules...")
-        if os.path.isfile('local_rules.txt'):
-            with open('local_rules.txt', 'r') as local_rules:
+        if os.path.isfile('localrules.txt'):
+            with open('localrules.txt', 'r') as local_rules:
                 rules = local_rules.read().splitlines()
                 rules_counter = self.add_rules_list(rules)
                 if rules_counter == 0:
                     logging.info(" -> no rules found!")
                 else:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
+        if ctx.options.useragent and os.path.isfile('useragent.txt'):
+            with open('useragent.txt') as f:
+                self.user_agent = f.readline().strip('\n')
+            self.custom_user_agent = True
 
     def load(self, loader):
         loader.add_option(
@@ -103,6 +106,12 @@ class Fiddleitm:
             typespec=bool,
             default=False,
             help="log events from rules that match",
+        )
+        loader.add_option(
+            name="useragent",
+            typespec=bool,
+            default=False,
+            help="use a custom referer from useragent.txt",
         )
 
     """ Add remote and local rules """
@@ -290,6 +299,9 @@ class Fiddleitm:
 
     """ flow request """
     def request(self, flow: http.HTTPFlow) -> None:
+        # Switch user-agent if needed
+        if self.custom_user_agent:
+            flow.request.headers["user-agent"] = self.user_agent
         # Do anti-vm
         if self.do_anti_vm:
             flow.request.text = self.anti_vm(flow)
