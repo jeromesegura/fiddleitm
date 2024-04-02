@@ -68,6 +68,8 @@ class Fiddleitm:
             try:
                 version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
                 if version_local != version_online:
+                    # Play sound
+                    print('\a')
                     print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
             except Exception:
                 logging.error("Failed to read fiddleitm version")
@@ -80,7 +82,8 @@ class Fiddleitm:
         if response.status_code:
             rules = response.text.split('\r\n')
             # Get rules date
-            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][14:25]
+            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][10:24]
+            print('Hsdfd ' + rules_date)
             rules_counter = self.add_rules_list(rules)
         logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
         # Load local rules
