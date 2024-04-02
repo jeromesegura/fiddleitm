@@ -5,8 +5,15 @@ It is used to inspect web traffic (flows) captured by mitmproxy
 and look for malicious indicators from on a list of rules.
 
 Usage:
-    mitmproxy --scripts fiddleitm.py
-    mitmweb --scripts fiddleitm.py
+    mitmproxy -s fiddleitm.py
+    mitmweb -s fiddleitm.py
+    mitmdump -s fiddleitm.py
+
+Options:
+
+ log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
+
+ add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
 
 Predefined rules (rules.txt) are loaded from the GitHub repository.
 
@@ -114,13 +121,8 @@ class Fiddleitm:
         for keyword in self.anti_vm_list:
             if keyword in request_response:
                 # Replace with random word from list
-                session = requests.Session()
-                session.trust_env = False
-                word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
-                response = session.get(word_site)
-                bytelist = response.content.splitlines()
-                stringlist = [x.decode('utf-8') for x in bytelist]
-                random_word = random.choice(stringlist)
+                random_list = ["Intel", "svchost", "svchost.exe", "Dell,INC.", "nVidia", "GeForce"]
+                random_word = random.choice(random_list)
                 print('Fingerprinting detected, replacing data in POST request with keyword: ' + random_word)
                 modified_request_response = request_response.replace(keyword, random_word)
                 break
@@ -228,7 +230,7 @@ class Fiddleitm:
                 else:
                     return False
         except Exception:
-            logging.error("error while decoding content (string)")
+            logging.error("error while decoding content (string) " + flow.request.pretty_url)
 
     """ Check for response body condition (regex) """
     def check_response_body_regex(self, flow, rule_name, response_body_regex):
@@ -242,7 +244,7 @@ class Fiddleitm:
                 else:
                     return False
         except Exception:
-            logging.error("error while decoding content (regex)")
+            logging.error("error while decoding content (regex) " + flow.request.pretty_url)
 
     """ Check for full URL condition (string) """
     def check_full_url_string(self, flow, rule_name, full_url_string):
