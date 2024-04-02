@@ -100,6 +100,8 @@ class Fiddleitm:
             with open('useragent.txt') as f:
                 self.user_agent = f.readline().strip('\n')
             self.custom_user_agent = True
+        else:
+            self.custom_user_agent = False
 
     def load(self, loader):
         loader.add_option(
