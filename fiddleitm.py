@@ -33,6 +33,7 @@ import re
 import mitmproxy
 from mitmproxy import http
 from mitmproxy.addonmanager import Loader
+from mitmproxy import ctx
 import random
 from datetime import datetime
 import logging
@@ -51,7 +52,6 @@ class Fiddleitm:
             "VBoxTray", "Fiddler", "FSE2"
         ]
         self.do_anti_vm = False
-        rules_counter = 0
         # Check for update
         session = requests.Session()
         session.trust_env = False
@@ -86,6 +86,14 @@ class Fiddleitm:
                     logging.info(" -> no rules found!")
                 else:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
+
+    def load(self, loader):
+        loader.add_option(
+            name="logevents",
+            typespec=bool,
+            default=False,
+            help="log events from rules that match",
+        )
 
     """ Add remote and local rules """
     def add_rules_list(self, rules):
@@ -259,15 +267,16 @@ class Fiddleitm:
         # Mark flow in web UI
         flow.marked = ":red_circle:"
         flow.comment = rule_name
-        # Log to file
-        get_referer = flow.request.headers.get("referer")
-        if get_referer is not None:
-            referer = get_referer
-        else:
-            referer = 'N/A'
-        with open("rules.log", 'a') as rules_log:
-            date_time = datetime.now().strftime("%m/%d/%Y %H:%M")
-            rules_log.write(date_time + ',' + rule_name + ',' + flow.request.pretty_url + ',' + referer + '\n')
+        # Log events to file
+        if ctx.options.logevents:
+            get_referer = flow.request.headers.get("referer")
+            if get_referer is not None:
+                referer = get_referer
+            else:
+                referer = 'N/A'
+            with open("rules.log", 'a') as rules_log:
+                date_time = datetime.now().strftime("%m/%d/%Y %H:%M")
+                rules_log.write(date_time + ',' + rule_name + ',' + flow.request.pretty_url + ',' + referer + '\n')
         # Check if anti-vm was detected
         if "Fingerprinting" in flow.comment:
             self.do_anti_vm = True
