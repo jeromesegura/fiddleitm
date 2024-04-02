@@ -95,7 +95,8 @@ class Fiddleitm:
                     logging.info(" -> no rules found!")
                 else:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
-        if ctx.options.useragent and os.path.isfile('useragent.txt'):
+        # Load custom user-agent if file exists
+        if os.path.isfile('useragent.txt'):
             with open('useragent.txt') as f:
                 self.user_agent = f.readline().strip('\n')
             self.custom_user_agent = True
@@ -108,10 +109,10 @@ class Fiddleitm:
             help="log events from rules that match",
         )
         loader.add_option(
-            name="useragent",
+            name="customuseragent",
             typespec=bool,
             default=False,
-            help="use a custom referer from useragent.txt",
+            help="use a custom user-agent from useragent.txt",
         )
 
     """ Add remote and local rules """
