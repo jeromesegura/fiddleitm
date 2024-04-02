@@ -51,6 +51,7 @@ class Fiddleitm:
             "VBoxTray", "Fiddler", "FSE2"
         ]
         self.do_anti_vm = False
+        rules_counter = 0
         # Check for update
         session = requests.Session()
         session.trust_env = False
@@ -68,26 +69,34 @@ class Fiddleitm:
         session = requests.Session()
         session.trust_env = False
         self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
-        response = session.get(self.rules_url)
+        response = session.get(self.rules_url) 
         if response.status_code:
-            rules = response.text.split('\r\n')
-            #self.add_rules_list(rules)
-        logging.info(" -> master rules loaded successfully")
+            rules = response.text.split('\r\n') 
+            # Get rules date
+            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][14:25]
+            rules_counter = self.add_rules_list(rules)
+        logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
         # Load local rules
         logging.info("Loading local rules...")
         if os.path.isfile('local_rules.txt'):
-            with open('local_rules.txt', 'r') as file:
-                rules = file.read().splitlines()
-                self.add_rules_list(rules)
-                logging.info(" -> local rules loaded successfully")
+            with open('local_rules.txt', 'r') as local_rules:
+                rules = local_rules.read().splitlines()
+                rules_counter = self.add_rules_list(rules)
+                if rules_counter == 0:
+                    logging.info(" -> no rules found!")
+                else:
+                    logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
 
     """ Add remote and local rules """
     def add_rules_list(self, rules):
+        rules_counter = 0
         for rule in rules:
             rule = rule.rstrip('\n')
             # Add rules
             if not rule.startswith("#"):
                 self.rules.append(rule)
+                rules_counter += 1
+        return rules_counter
 
     """ anti-vm """
     def anti_vm(self, flow):
