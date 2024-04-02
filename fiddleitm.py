@@ -15,16 +15,16 @@ directory as fiddleitm.py
 
 Syntax for rules:
 
- rule_name:"rule name"; "condition 1"; "condition 2"; "condition n"
+ rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...
 
  List of conditions:
-    hostname:"string"
-    server_ip:"string"
-    content:"string"
-    url_regex:"regex"
-    response_body_regex:"regex"
+  host_name
+  host_ip
+  full_url
+  response_body
 
-You can add multiple conditions of the same type (i.e. content:"text1"; content"text2").
+ Example:
+ rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/
 """
 
 import os
