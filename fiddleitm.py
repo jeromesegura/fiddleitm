@@ -24,7 +24,7 @@ Syntax for rules:
   response_body
 
  Example:
- rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/
+ rule_name = "My first rule"; full_url = /[a-z]{5}[0-9]{2}/; response_body = "DevTools"; response_body = /function[0-9]{2}/
 """
 
 import os
@@ -69,9 +69,9 @@ class Fiddleitm:
         session = requests.Session()
         session.trust_env = False
         self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
-        response = session.get(self.rules_url) 
+        response = session.get(self.rules_url)
         if response.status_code:
-            rules = response.text.split('\r\n') 
+            rules = response.text.split('\r\n')
             # Get rules date
             rules_date = re.findall(r'Last updated:\s.+', response.text)[0][14:25]
             rules_counter = self.add_rules_list(rules)
@@ -211,23 +211,30 @@ class Fiddleitm:
     """ Check for response body condition (string) """
     def check_response_body_string(self, flow, rule_name, response_body_string):
         # Only check if response exists and matches content-type
-        if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-            "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
-            ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
-            if response_body_string in flow.response.text:
-                return True
-            else:
-                return False
+        try:
+            if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
+                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
+                 ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
+                if response_body_string in flow.response.text:
+                    return True
+                else:
+                    return False
+        except Exception:
+            logging.error("error while decoding content (string)")
+
     """ Check for response body condition (regex) """
     def check_response_body_regex(self, flow, rule_name, response_body_regex):
         # Only check if response exists and matches content-type
-        if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-            "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
-            ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
-            if re.search(response_body_regex, flow.response.text):
-                return True
-            else:
-                return False
+        try:
+            if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
+                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
+                 ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
+                if re.search(response_body_regex, flow.response.text):
+                    return True
+                else:
+                    return False
+        except Exception:
+            logging.error("error while decoding content (regex)")
 
     """ Check for full URL condition (string) """
     def check_full_url_string(self, flow, rule_name, full_url_string):
