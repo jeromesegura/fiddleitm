@@ -2,18 +2,25 @@
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) based on [EKFiddle](https://github.com/malwareinfosec/EKFiddle/) (Fiddler extension)
 
-It is used to inspect web traffic (flows) captured by mitmproxy
-and look for malicious indicators from on a list of rules.
+It is used to inspect web traffic (flows) captured by mitmproxy and looks for malicious indicators from on a list of rules.
 
 **Usage:**
 
-To launch the command line interface:
+To launch the mitmproxy interactive proxy:
 
-`mitmproxy --scripts fiddleitm.py`
+`mitmproxy -s fiddleitm.py`
 
 To launch the web interface:
 
-`mitmweb --scripts fiddleitm.py`
+`mitmweb --s fiddleitm.py`
+
+To launch the command-line version of mitmproxy (useful for capturing a lot of traffic):
+
+`mitmdump --s fiddleitm.py`
+
+Options:
+
+* log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
 
 # Features
 
@@ -44,7 +51,7 @@ You can add your own rules to a file called ``local_rules.txt`` placed in the sa
 
 * ``response_body``
 
-**Example**
+**Example:**
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/``
 
