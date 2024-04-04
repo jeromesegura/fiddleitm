@@ -12,11 +12,11 @@ To launch the mitmproxy interactive proxy:
 
 To launch the web interface:
 
-`mitmweb --s fiddleitm.py`
+`mitmweb -s fiddleitm.py`
 
 To launch the command-line version of mitmproxy (useful for capturing a lot of traffic):
 
-`mitmdump --s fiddleitm.py`
+`mitmdump -s fiddleitm.py`
 
 Options:
 
