@@ -83,7 +83,7 @@ class Fiddleitm:
             rules_date = re.findall(r'Last updated:\s.+', response.text)[0][10:24]
             rules_counter = self.add_rules_list(rules)
         logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
-        # Load local rules
+        # Load local rules (if file present)
         logging.info("Loading local rules...")
         if os.path.isfile('localrules.txt'):
             with open('localrules.txt', 'r') as local_rules:
@@ -93,6 +93,7 @@ class Fiddleitm:
                     logging.info(" -> no rules found!")
                 else:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
+        logging.info("No local rules found (localrules.txt)")
         # Load custom user-agent if file exists
         if os.path.isfile('useragent.txt'):
             with open('useragent.txt') as f:
