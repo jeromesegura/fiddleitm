@@ -1,8 +1,6 @@
 # fiddleitm v.0.1
 
-This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) based on [EKFiddle](https://github.com/malwareinfosec/EKFiddle/) (Fiddler extension)
-
-It is used to inspect web traffic (flows) captured by mitmproxy and looks for malicious indicators from on a list of rules.
+This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
 **Usage:**
 
@@ -37,7 +35,7 @@ Currently, **fiddleitm** inspects the following:
 * remote host full URL
 * response body
 
-Predefined [rules](https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
+Predefined [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
 
 You can add your own rules to a file called ``localrules.txt`` placed in the same directory as ``fiddleitm.py``.
 
@@ -59,9 +57,9 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/``
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/2e6294e9-6282-4ab8-8e05-53a42720b4d6)
+![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/a147ff98-91c8-47e4-8022-6ce58522a93d)
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/ff8e17a0-5288-467f-a71c-4f5c5c49bde1)
+![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/0383966b-0c94-4ff5-9836-38088e4be038)
 
 ## Anti-VM detection and evasion
 
@@ -69,5 +67,4 @@ Threat actors can use JavaScript code to fingerprint visitors and detect if they
 
 fiddleitm intercepts such attempts and replaces certain keywords commonly used to detect virtual machines with random words.
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/c7bca2df-d93d-4880-9a4f-803c74dae36e)
-
+![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/3dab8c57-2c16-4485-ab37-f1a9acdb92aa)
