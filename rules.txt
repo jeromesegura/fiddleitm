@@ -1,5 +1,5 @@
 # Rules for mitmproxy
-# To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
+# To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
 # Last updated: 2024-04-21
 
 # Social engineering (malware)
