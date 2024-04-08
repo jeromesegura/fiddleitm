@@ -1,11 +1,13 @@
 # Rules for mitmproxy
-# To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
+# To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
 # Last updated: 2024-04-21
 
 # Social engineering (malware)
 rule_name = "SocGholish"; full_url = /(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/[\w\/\+]{39}=$/
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
 rule_name = "Parrot TDS (NDSW)"; response_body = /;if\(typeof\sndsw==="undefined"\)\{/
+rule_name = "SmartApeSG (redirect)"; full_url = "/cdn-vs/cache.php"; response_body = "w.php?reqtime="
+rule_name = "SmartApeSG (landing)"; full_url = "reqtime"; response_body = "msSaveOrOpenBlob"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
