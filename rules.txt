@@ -8,6 +8,7 @@ rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; res
 rule_name = "Parrot TDS (NDSW)"; response_body = /;if\(typeof\sndsw==="undefined"\)\{/
 rule_name = "SmartApeSG (redirect)"; full_url = "/cdn-vs/cache.php"; response_body = "w.php?reqtime="
 rule_name = "SmartApeSG (landing)"; full_url = "reqtime"; response_body = "msSaveOrOpenBlob"
+rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
