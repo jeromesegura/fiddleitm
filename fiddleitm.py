@@ -67,7 +67,7 @@ class Fiddleitm:
                 version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
                 if version_local != version_online:
                     # Play sound
-                    print('\a')
+                    print('\a', end = '')
                     print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
             except Exception:
                 logging.error("Failed to read fiddleitm version")
@@ -80,7 +80,8 @@ class Fiddleitm:
         if response.status_code:
             rules = response.text.split('\r\n')
             # Get rules date
-            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][10:24]
+            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
+            # Count number of rules
             rules_counter = self.add_rules_list(rules)
         logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
         # Load local rules (if file present)
@@ -88,12 +89,14 @@ class Fiddleitm:
         if os.path.isfile('localrules.txt'):
             with open('localrules.txt', 'r') as local_rules:
                 rules = local_rules.read().splitlines()
+                # Count number of rules
                 rules_counter = self.add_rules_list(rules)
                 if rules_counter == 0:
                     logging.info(" -> no rules found!")
                 else:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
-        logging.info("No local rules found (localrules.txt)")
+        else:
+            logging.info("No local rules found (localrules.txt)")
         # Load custom user-agent if file exists
         if os.path.isfile('useragent.txt'):
             with open('useragent.txt') as f:
@@ -277,7 +280,7 @@ class Fiddleitm:
     """ Mark flows """
     def mark_flow(self, flow, rule_name):
         # Play sound
-        print('\a')
+        print('\a', end = '')
         # Print detection name in console
         print(rule_name)
         # Mark flow in web UI
