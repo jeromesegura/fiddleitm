@@ -9,9 +9,13 @@ Usage:
 
 Options:
 
- log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
+ modify default user-agent with your own --set custom_user_agent=""
 
- add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
+ modify default accept-language with your own --set custom_accept_language=""
+
+ log events for rules that match flows (writes to rules.log) --set log_events=true
+
+ add upstream proxy --mode upstream:http://proxyhost:port --upstream-auth username:password
 
 Predefined rules (rules.txt) are loaded from the GitHub repository.
 
@@ -97,26 +101,25 @@ class Fiddleitm:
                     logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
         else:
             logging.info("No local rules found (localrules.txt)")
-        # Load custom user-agent if file exists
-        if os.path.isfile('useragent.txt'):
-            with open('useragent.txt') as f:
-                self.user_agent = f.readline().strip('\n')
-            self.custom_user_agent = True
-        else:
-            self.custom_user_agent = False
 
     def load(self, loader):
         loader.add_option(
-            name="logevents",
+            name="log_events",
             typespec=bool,
             default=False,
             help="log events from rules that match",
         )
         loader.add_option(
-            name="customuseragent",
-            typespec=bool,
-            default=False,
-            help="use a custom user-agent from useragent.txt",
+            name="custom_user_agent",
+            typespec=str,
+            default="",
+            help="use a custom user-agent from command line",
+        )
+        loader.add_option(
+            name="custom_accept_language",
+            typespec=str,
+            default="",
+            help="use a custom accept-language from command line",
         )
 
     """ Add remote and local rules """
@@ -287,7 +290,7 @@ class Fiddleitm:
         flow.marked = ":red_circle:"
         flow.comment = rule_name
         # Log events to file
-        if ctx.options.logevents:
+        if ctx.options.log_events:
             get_referer = flow.request.headers.get("referer")
             if get_referer is not None:
                 referer = get_referer
@@ -304,9 +307,12 @@ class Fiddleitm:
 
     """ flow request """
     def request(self, flow: http.HTTPFlow) -> None:
-        # Switch user-agent if needed
-        if self.custom_user_agent:
-            flow.request.headers["user-agent"] = self.user_agent
+        # Override user-agent if needed
+        if ctx.options.custom_user_agent:
+            flow.request.headers["user-agent"] = ctx.options.custom_user_agent
+        # Override accept-language if needed
+        if ctx.options.custom_accept_language:
+            flow.request.headers["accept-language"] = ctx.options.custom_accept_language
         # Do anti-vm
         if self.do_anti_vm:
             flow.request.text = self.anti_vm(flow)
