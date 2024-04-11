@@ -11,7 +11,7 @@ rule_name = "SmartApeSG (landing)"; full_url = "reqtime"; response_body = "msSav
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
 rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
-rule_name = "FakeBat payload"; full_url = /\/uploads?\/UpdateSetup-x86.msix$/
+rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
