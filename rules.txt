@@ -10,7 +10,7 @@ rule_name = "SmartApeSG (redirect)"; full_url = "/cdn-vs/cache.php"; response_bo
 rule_name = "SmartApeSG (landing)"; full_url = "reqtime"; response_body = "msSaveOrOpenBlob"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
-rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com\//
+rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
 rule_name = "FakeBat payload"; full_url = /\/uploads?\/UpdateSetup-x86.msix$/
 
 # Social engineering (scams)
