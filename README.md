@@ -18,9 +18,11 @@ To launch the command-line version of mitmproxy (useful for capturing a lot of t
 
 Options:
 
-* modify default user-agent with your own (reads first line from *useragent.txt*) ``--set customuseragent=true``
+* modify default user-agent with your own ``--set customuseragent=true``
 
-* log events for rules that match flows (writes to *rules.log*) ``--set logevents=true``
+* modify default accept-language with your own ``--set custom_accept_language=""``
+
+* log events for rules that match flows (writes to *rules.log*) ``--set log_events=true``
 
 * add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
 
