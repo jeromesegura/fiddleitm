@@ -18,7 +18,7 @@ To launch the command-line version of mitmproxy (useful for capturing a lot of t
 
 Options:
 
-* modify default user-agent with your own ``--set custom_user_agent=true``
+* modify default user-agent with your own ``--set custom_user_agent=""``
 
 * modify default accept-language with your own ``--set custom_accept_language=""``
 
