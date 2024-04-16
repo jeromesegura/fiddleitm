@@ -12,6 +12,10 @@ rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*
 rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
 rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
 rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
+rule_name = "ClearFake injection"; response_body = "base64,YXN5bmMgZnVuY3"
+rule_name = "ClearFake redirect"; response_body = "remove_iframe=e"; response_body = "["z-index"]="99999999999""
+rule_name = "ClearFake crt"; full_url = "certificate.crt"; response_body = "I1IIll1l"
+rule_name = "ClearFake template"; full_url = /\/\w{92}\.html$/; response_body = "fbzMcFZ1IkLk"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
