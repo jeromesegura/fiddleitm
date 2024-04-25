@@ -49,7 +49,7 @@ import logging
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.1"
+        version_local = "0.2"
         print('#################')
         print(' fiddleitm v.' + version_local)
         print('#################')
@@ -120,6 +120,12 @@ class Fiddleitm:
             typespec=str,
             default="",
             help="use a custom accept-language from command line",
+        )
+        loader.add_option(
+            name = "web_columns",
+            typespec=typing.Sequence[str],
+            default=['tls', 'icon', 'path', 'method', 'status', 'size', 'comment', 'time'],
+            help="use custom columns",
         )
 
     """ Add remote and local rules """
