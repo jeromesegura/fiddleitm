@@ -46,6 +46,7 @@ from mitmproxy import ctx
 import random
 from datetime import datetime
 import logging
+import typing
 
 class Fiddleitm:
     def __init__(self):
