@@ -65,7 +65,7 @@ class Fiddleitm:
         # Check for update
         session = requests.Session()
         session.trust_env = False
-        read_version = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/fiddleitm.py'
+        read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
         response = session.get(read_version)
         if response.status_code:
             try:
@@ -80,7 +80,7 @@ class Fiddleitm:
         logging.info("Loading main rules...")
         session = requests.Session()
         session.trust_env = False
-        self.rules_url = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt'
+        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
         response = session.get(self.rules_url)
         if response.status_code:
             rules = response.text.split('\r\n')
@@ -250,7 +250,7 @@ class Fiddleitm:
         # Only check if response exists and matches content-type
         try:
             if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-                "jeromesegura/fiddleitm/" not in flow.request.pretty_url and \
+                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
                  ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
                 if response_body_string in flow.response.text:
                     return True
@@ -264,7 +264,7 @@ class Fiddleitm:
         # Only check if response exists and matches content-type
         try:
             if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-                "jeromesegura/fiddleitm/" not in flow.request.pretty_url and \
+                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
                  ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
                 if re.search(response_body_regex, flow.response.text):
                     return True
