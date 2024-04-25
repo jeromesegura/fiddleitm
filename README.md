@@ -70,3 +70,15 @@ Threat actors can use JavaScript code to fingerprint visitors and detect if they
 fiddleitm intercepts such attempts and replaces certain keywords commonly used to detect virtual machines with random words.
 
 ![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/3dab8c57-2c16-4485-ab37-f1a9acdb92aa)
+
+## To-do list
+
+Keybindings for: 
+
+* upstream proxy (detach)
+
+* saving all URLs from flows
+
+* updating user-agent on the fly
+
+* updateing upstream proxy on the fly
