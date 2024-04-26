@@ -1,4 +1,4 @@
-# fiddleitm v.0.2
+# fiddleitm v.0.3
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -55,9 +55,13 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 * ``response_body``
 
+**Optional:**
+* ``emoji_name``
+  (Displays an emoji to mark the flow. List of emojis: https://api.github.com/emojis)
+
 **Example:**
 
-``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/``
+``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; response_body = /function[0-9]{2}/; emoji_name = ":grapes:"``
 
 ![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/a147ff98-91c8-47e4-8022-6ce58522a93d)
 
