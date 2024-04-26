@@ -139,7 +139,7 @@ class Fiddleitm:
         for rule in rules:
             rule = rule.rstrip('\n')
             # Add rules
-            if not rule.startswith("#"):
+            if rule.startswith("rule_name"):
                 self.rules.append(rule)
                 rules_counter += 1
         return rules_counter
