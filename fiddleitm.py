@@ -32,8 +32,12 @@ Syntax for rules:
   full_url
   response_body
 
+ Optional:
+  emoji_name
+  (Displays an emoji to mark the flow. List of emojis: https://api.github.com/emojis)
+
  Example:
- rule_name = "My first rule"; full_url = /[a-z]{5}[0-9]{2}/; response_body = "DevTools"; response_body = /function[0-9]{2}/
+ rule_name = "My first rule"; full_url = /[a-z]{5}[0-9]{2}/; response_body = "DevTools"; response_body = /function[0-9]{2}/; emoji_name = ":grapes:"
 """
 
 import os
@@ -50,7 +54,7 @@ import typing
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2"
+        version_local = "0.3"
         print('#################')
         print(' fiddleitm v.' + version_local)
         print('#################')
@@ -165,6 +169,10 @@ class Fiddleitm:
             for condition in conditions_list:
                 if "rule_name = \"" in condition:
                     rule_name = condition.strip("rule_name = ").strip('"')
+                if "emoji_name = \"" in condition:
+                    emoji_name = condition.strip("emoji_name = ").strip('"')
+                else:
+                    emoji_name = None
                 if "host_name = \"" in condition:
                     host_name_string = condition.strip("host_name = ").strip('"')
                     matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
@@ -209,7 +217,7 @@ class Fiddleitm:
             # check if we have a match for all conditions
             if matched_condition:
                 # Call mark_flow function
-                self.mark_flow(flow, rule_name)
+                self.mark_flow(flow, rule_name, emoji_name)
 
     """ Check for hostname condition (string) """
     def check_hostname_string(self, flow, rule_name, host_name_string):
@@ -288,13 +296,16 @@ class Fiddleitm:
             return False
 
     """ Mark flows """
-    def mark_flow(self, flow, rule_name):
+    def mark_flow(self, flow, rule_name, emoji_name):
         # Play sound
         print('\a', end = '')
         # Print detection name in console
         print(rule_name)
         # Mark flow in web UI
-        flow.marked = ":red_circle:"
+        if emoji_name is not None:
+            flow.marked = emoji_name
+        else:
+            flow.marked = ":red:"
         flow.comment = rule_name
         # Log events to file
         if ctx.options.log_events:
