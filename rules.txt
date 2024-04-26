@@ -26,3 +26,4 @@ rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need
 # Misc
 rule_name = "Google DNS lookup"; full_url = "dns.google/resolve"
 rule_name = "IP check"; full_url = "api64.ipify.org/"
+rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
