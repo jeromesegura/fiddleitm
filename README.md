@@ -59,15 +59,11 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 **Optional:**
 * ``emoji_name``
-  (Displays an emoji to mark the flow. List of emojis: https://api.github.com/emojis)
+  (Displays an emoji to mark the flow. Please note that the `emoji_name` must be placed at the end of your rule. List of emojis: https://api.github.com/emojis)
 
 **Example:**
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; emoji_name = ":grapes:"``
-
-![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/a147ff98-91c8-47e4-8022-6ce58522a93d)
-
-![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/0383966b-0c94-4ff5-9836-38088e4be038)
 
 ## Anti-VM detection and evasion
 
