@@ -1,13 +1,13 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-04-26
+# Last updated: 2024-04-29
 
 # Social engineering (malware)
 rule_name = "SocGholish"; full_url = /(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/[\w\/\+]{39}=$/
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
 rule_name = "Parrot TDS (NDSW)"; response_body = /;if\(typeof\sndsw==="undefined"\)\{/
-rule_name = "SmartApeSG (redirect)"; full_url = "/cdn-vs/cache.php"; response_body = "w.php?reqtime="
-rule_name = "SmartApeSG (landing)"; full_url = "reqtime"; response_body = "msSaveOrOpenBlob"
+rule_name = "SmartApeSG"; full_url = /\/cdn[^\/]*\/(minlen|get|cache).php/
+rule_name = "SmartApeSG"; full_url = /\/cdn[^\/]*\/original.js/; response_body = "isBrowserSupported"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
 rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
