@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-05-01
+# Last updated: 2024-05-12
 
 # Social engineering (malware)
 rule_name = "SocGholish"; full_url = /(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/[\w\/\+]{39}=$/
@@ -17,6 +17,9 @@ rule_name = "ClearFake redirect"; response_body = "remove_iframe=e"; response_bo
 rule_name = "ClearFake crt"; full_url = "certificate.crt"; response_body = "I1IIll1l"
 rule_name = "ClearFake template"; full_url = /\/\w{92}\.html$/; response_body = "fbzMcFZ1IkLk"
 rule_name = "FIN7 phishing page"; response_body = "Requires Browser Extension"; response_body = /special\s[bB]rowser\s[eE]xtension/; emoji_name = ":fish:"
+rule_name = "Binance"; full_url = "https://bsc-dataseed1.binance.org/"
+rule_name = "ClearFake iframe"; full_url = "/8OtaBr/"
+rule_name = "ClearFake lander"; full_url = "/bvxny6R6"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
