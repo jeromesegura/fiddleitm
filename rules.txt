@@ -4,6 +4,7 @@
 
 # Social engineering (malware)
 rule_name = "SocGholish"; full_url = /(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/[\w\/\+]{39}=$/
+rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
 rule_name = "Parrot TDS (NDSW)"; response_body = /;if\(typeof\sndsw==="undefined"\)\{/
 rule_name = "SmartApeSG"; full_url = /\/cdn[^\/]*\/(minlen|get|cache).php/
