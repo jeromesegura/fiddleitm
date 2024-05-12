@@ -2,6 +2,8 @@
 This is an addon for mitmproxy that inspects flows and
 identifies malicious web traffic.
 
+GitHub: https://github.com/malwareinfosec/fiddleitm
+
 Usage:
     mitmproxy -s fiddleitm.py
     mitmweb -s fiddleitm.py
@@ -54,10 +56,10 @@ import typing
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.3"
-        print('#################')
-        print(' fiddleitm v.' + version_local)
-        print('#################')
+        version_local = "1.0"
+        print('####################')
+        print('# fiddleitm v.' + version_local + '  #')
+        print('####################')
         # Initialize variables
         self.rules = []
         self.anti_vm_list = [
@@ -66,33 +68,36 @@ class Fiddleitm:
             "VBoxTray", "Fiddler", "FSE2"
         ]
         self.do_anti_vm = False
-        # Check for update
-        session = requests.Session()
-        session.trust_env = False
-        read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
-        response = session.get(read_version)
-        if response.status_code:
-            try:
-                version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
-                if version_local != version_online:
-                    # Play sound
-                    print('\a', end = '')
-                    print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
-            except Exception:
-                logging.error("Failed to read fiddleitm version")
-        # Load main rules
-        logging.info("Loading main rules...")
-        session = requests.Session()
-        session.trust_env = False
-        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
-        response = session.get(self.rules_url)
-        if response.status_code:
-            rules = response.text.split('\r\n')
-            # Get rules date
-            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
-            # Count number of rules
-            rules_counter = self.add_rules_list(rules)
-        logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
+        if self.internet_connection():
+            # Check for update
+            session = requests.Session()
+            session.trust_env = False
+            read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
+            response = session.get(read_version)
+            if response.status_code:
+                try:
+                    version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
+                    if version_local != version_online:
+                        # Play sound
+                        print('\a', end = '')
+                        print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
+                except Exception:
+                    logging.error("Failed to read fiddleitm version")
+            # Load main rules
+            logging.info("Loading main rules...")
+            session = requests.Session()
+            session.trust_env = False
+            self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
+            response = session.get(self.rules_url)
+            if response.status_code:
+                rules = response.text.split('\r\n')
+                # Get rules date
+                rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
+                # Count number of rules
+                rules_counter = self.add_rules_list(rules)
+            logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
+        else:
+            logging.info('Offline mode')
         # Load local rules (if file present)
         logging.info("Loading local rules...")
         if os.path.isfile('localrules.txt'):
@@ -133,6 +138,15 @@ class Fiddleitm:
             help="use custom columns",
         )
 
+    """ Check for internet connection"""
+    def internet_connection(self):
+        try:
+            os.environ['no_proxy'] = '*'
+            response = requests.get("https://google.com", timeout=5)
+            return True
+        except requests.ConnectionError:
+            return False
+
     """ Add remote and local rules """
     def add_rules_list(self, rules):
         rules_counter = 0
@@ -163,16 +177,26 @@ class Fiddleitm:
     def check_rules(self, flow):
         # Loop through rules
         for rule in self.rules:
+            # Create list of elements for each rule
+            elements_list = rule.split("; ")
+            # get rule name
+            rule_name = elements_list[0].strip("rule_name = ").strip('"')
+            # remove rule name from elements_list
+            elements_list.pop(0)
+            # get emoji_name if it's there by finding its index in the list
+            emoji_index_list = [elements_list.index(l) for l in elements_list if l.startswith('emoji_name = ')]
+            if emoji_index_list:
+                # convert it to an integer
+                emoji_index = int(''.join(map(str, emoji_index_list)))
+                # get emoji_name value
+                emoji_name = elements_list[emoji_index].strip("emoji_name = ").strip('"')
+                # remove emoji name from elements_list
+                elements_list.pop(emoji_index)
+            else:
+                emoji_name = None
+            # loop through conditions
             matched_condition = False
-            # split rule into multiple conditions
-            conditions_list = rule.split("; ")
-            for condition in conditions_list:
-                if "rule_name = \"" in condition:
-                    rule_name = condition.strip("rule_name = ").strip('"')
-                if "emoji_name = \"" in condition:
-                    emoji_name = condition.strip("emoji_name = ").strip('"')
-                else:
-                    emoji_name = None
+            for condition in elements_list:
                 if "host_name = \"" in condition:
                     host_name_string = condition.strip("host_name = ").strip('"')
                     matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
