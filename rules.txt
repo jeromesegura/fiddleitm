@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-05-12
+# Last updated: 2024-05-14
 
 # Social engineering (malware)
 rule_name = "SocGholish"; full_url = /(?!www)[^.]([a-z]+\.(?!google)){2}[a-z]{2,10}\/[\w\/\+]{39}=$/
@@ -22,6 +22,13 @@ rule_name = "Binance"; full_url = "https://bsc-dataseed1.binance.org/"
 rule_name = "ClearFake iframe"; full_url = "/8OtaBr/"
 rule_name = "ClearFake lander"; full_url = "/bvxny6R6"
 
+# Social engineering (phishing)
+rule_name = "Tycoon (Microsoft)"; response_body = /function tryfindingele/
+rule_name = "Tycoon (Microsoft)"; response_body = /function selectmultipleaccountadfs/
+rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/
+rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"
+rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"
+
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 rule_name = "TSS redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
@@ -34,4 +41,3 @@ rule_name = "Google DNS lookup"; full_url = "dns.google/resolve"
 rule_name = "IP check"; full_url = "api64.ipify.org/"
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
 rule_name = "Click tracker"; full_url = /onelink\.me|kochava\.com|gotrackier\.com/; full_url = "gad_source"; emoji_name = ":computer_mouse:"
-rule_name = "Payload"; full_url = /\.(exe|msi|msix)$/; emoji_name = ":bomb:"
