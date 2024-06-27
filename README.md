@@ -6,8 +6,7 @@ This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) tha
 
 If you'd like the flows to be highlighted (in addition to the comments and emojis), simply type ``~marked`` in the filter section:
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/6c828004-2acf-400a-8e73-b0c3cfd4f708)
-
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/5a97e452-db7b-4444-82eb-2fa486895521)
 
 **Usage:**
 
