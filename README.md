@@ -26,7 +26,7 @@ Options:
 
 * override default user-agent: ``--set custom_user_agent=""``
 
-* modify default referer with your own --set custom_referer=""
+* override default referer: ``--set custom_referer=""``
 
 * overrride default accept-language: ``--set custom_accept_language=""``
 
