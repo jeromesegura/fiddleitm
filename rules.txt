@@ -36,10 +36,12 @@ rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 rule_name = "TSS redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
 rule_name = "TSS"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
 
-# Skimming
-rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"
-rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF8St'+'ring'"
-rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/
+# Web skimming
+rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
+rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF8St'+'ring'"; emoji_name = ":credit_card:"
+rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
+rule_name = "Gootag WC skimmer"; response_body = "function(g,o,o_,t_,a_,g_)"; emoji_name = ":credit_card:"
+rule_name = "Gootag WC skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
 
 # Fingerprinting
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
