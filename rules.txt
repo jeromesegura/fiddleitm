@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-06-11
+# Last updated: 2024-06-26
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -35,6 +35,12 @@ rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 rule_name = "TSS redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
 rule_name = "TSS"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
+
+# Skimming
+rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"
+rule_name = "Kritec skimmer stager"; host_name = /\.(shop|quest|store|click|online)//; response_body = "Ly9"
+rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF8St'+'ring'"
+rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/
 
 # Fingerprinting
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
