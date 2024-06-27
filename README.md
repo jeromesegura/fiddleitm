@@ -4,6 +4,11 @@ This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) tha
 
 ![Interface](interface.png)
 
+If you'd like the flows to be highlighted (in addition to the comments and emojis), simply type ``~marked`` in the filter section:
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/6c828004-2acf-400a-8e73-b0c3cfd4f708)
+
+
 **Usage:**
 
 To launch the mitmproxy interactive proxy:
@@ -20,13 +25,13 @@ To launch the command-line version of mitmproxy (useful for capturing a lot of t
 
 Options:
 
-* modify default user-agent with your own ``--set custom_user_agent=""``
+* override default user-agent: ``--set custom_user_agent=""``
 
-* modify default accept-language with your own ``--set custom_accept_language=""``
+* overrride default accept-language: ``--set custom_accept_language=""``
 
-* log events for rules that match flows (writes to *rules.log*) ``--set log_events=true``
+* log events for rules that match flows (writes to *rules.log*): ``--set log_events=true``
 
-* add upstream proxy ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
+* add upstream proxy: ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
 
 # Features
 
@@ -73,14 +78,3 @@ fiddleitm intercepts such attempts and replaces certain keywords commonly used t
 
 ![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/3dab8c57-2c16-4485-ab37-f1a9acdb92aa)
 
-## To-do list
-
-Keybindings for: 
-
-* upstream proxy (detach)
-
-* saving all URLs from flows
-
-* updating user-agent on the fly
-
-* updateing upstream proxy on the fly
