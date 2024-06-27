@@ -12,6 +12,8 @@ Usage:
 Options:
 
  modify default user-agent with your own --set custom_user_agent=""
+ 
+ modify default referer with your own --set custom_referer=""
 
  modify default accept-language with your own --set custom_accept_language=""
 
@@ -56,7 +58,7 @@ import typing
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "1.0"
+        version_local = "1.1"
         print('####################')
         print('# fiddleitm v.' + version_local + '  #')
         print('####################')
@@ -124,6 +126,12 @@ class Fiddleitm:
             typespec=str,
             default="",
             help="use a custom user-agent from command line",
+        )
+        loader.add_option(
+            name="custom_referer",
+            typespec=str,
+            default="",
+            help="use a custom referer from command line",
         )
         loader.add_option(
             name="custom_accept_language",
@@ -203,7 +211,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "host_name = /" in condition:
-                    host_name_regex = condition.strip("host_name = /").strip('"')
+                    host_name_regex = condition.replace("host_name = /", "")[:-1]
                     matched_condition = self.check_hostname_regex(flow, rule_name, host_name_regex)
                     if matched_condition == False:
                         break
@@ -213,7 +221,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "host_ip = /" in condition:
-                    host_ip_regex = condition.strip("host_ip = /").strip('"')
+                    host_ip_regex = condition.replace("host_ip = /", "")[:-1]
                     matched_condition = self.check_host_ip_regex(flow, rule_name, host_ip_regex)
                     if matched_condition == False:
                         break
@@ -223,7 +231,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "response_body = /" in condition:
-                    response_body_regex = condition.strip("response_body = /").strip('"')
+                    response_body_regex = condition.replace("response_body = /", "")[:-1]
                     matched_condition = self.check_response_body_regex(flow, rule_name, response_body_regex)
                     if matched_condition == False:
                         break
@@ -233,7 +241,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "full_url = /" in condition:
-                    full_url_regex = condition.strip("full_url = /").strip('"')
+                    full_url_regex = condition.replace("full_url = /", "")[:-1]
                     matched_condition = self.check_full_url_regex(flow, rule_name, full_url_regex)
                     if matched_condition == False:
                         break
@@ -352,6 +360,9 @@ class Fiddleitm:
         # Override user-agent if needed
         if ctx.options.custom_user_agent:
             flow.request.headers["user-agent"] = ctx.options.custom_user_agent
+        # Override referer if needed
+        if ctx.options.custom_referer:
+            flow.request.headers["Referer"] = ctx.options.custom_referer
         # Override accept-language if needed
         if ctx.options.custom_accept_language:
             flow.request.headers["accept-language"] = ctx.options.custom_accept_language
