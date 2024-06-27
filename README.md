@@ -1,4 +1,4 @@
-# fiddleitm v.1.0
+# fiddleitm v.1.1
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -26,6 +26,8 @@ To launch the command-line version of mitmproxy (useful for capturing a lot of t
 Options:
 
 * override default user-agent: ``--set custom_user_agent=""``
+
+* modify default referer with your own --set custom_referer=""
 
 * overrride default accept-language: ``--set custom_accept_language=""``
 
