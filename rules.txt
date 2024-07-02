@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-06-28
+# Last updated: 2024-07-02
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -22,7 +22,8 @@ rule_name = "FIN7 phishing page"; response_body = "Requires Browser Extension"; 
 rule_name = "Binance"; full_url = "https://bsc-dataseed1.binance.org/"
 rule_name = "ClearFake iframe"; full_url = "/8OtaBr/"
 rule_name = "ClearFake lander"; full_url = "/bvxny6R6"
-rule_name = "Kongtuke"; response_body = "var refferer"; response_body = "var nURL=domainName"
+rule_name = "Kongtuke JS"; response_body = "&refferer"; reponse_body = "/js.php?device="
+rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
 # Look for base64 version of this: https://cdn.ethers.io/lib/ethers-5.2.umd.min.js
 rule_name = "ClickFix (injection)"; response_body = "aHR0cHM6Ly9jZG4uZXRoZXJzLmlvL2xpYi9ldGhlcnMtNS4yLnVtZC5taW4uanM"
 # Look for base64 version of this: function load() { console.log('Browser work correctly'); }
