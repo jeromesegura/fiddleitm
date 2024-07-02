@@ -79,7 +79,7 @@ This feature is not currently supported in mitmweb, but fiddleitm provides a way
 
 Then type: ```fiddleitm.search @all regex here```
 
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/30a111d3-bae0-4c4b-b226-b15e3d7b1950)
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/fd80ae85-0d11-4126-aba7-da037f715106)
 
 You can replace @all by @shown @focus @marked @unmarked @hidden
 
