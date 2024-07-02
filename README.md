@@ -1,4 +1,4 @@
-# fiddleitm v.1.1
+# fiddleitm v.1.2
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -40,7 +40,7 @@ Options:
 
 Currently, **fiddleitm** inspects the following:
 
-* remote host name IP address
+* remote host name
 * remote host IP address
 * remote host full URL
 * response body
@@ -70,6 +70,40 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 **Example:**
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; emoji_name = ":grapes:"``
+
+## Search within the body content of each flow
+
+This feature is not currently supported in mitmweb, but fiddleitm provides a way to search using a regex via a command. You first need to enable the command line in the UI, by going to Options -> Display Command Bar.
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/ece9bc20-a3db-45ac-a0c1-07b299338c4b)
+
+Then type: ```fiddleitm.search @all regex here```
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/30a111d3-bae0-4c4b-b226-b15e3d7b1950)
+
+You can replace @all by @shown @focus @marked @unmarked @hidden
+
+The search results will be printed in the CLI as well as marked in the UI:
+
+![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/293d6fc1-afe3-4727-aaef-26657fc17892)
+
+## Print (copy to clipboard) flow URLs that have been detected by a rule
+
+This command allows you to print the flow URLs that matched your rules. See above on how to enter commands.
+
+```fiddleitm.printurls @all```
+
+## Run rules manually
+
+This command executes rules (both ```rules.txt``` and ```localrules.txt```) on the selected traffic. This is useful if you are testing a new rule in your ```localrules.txt```.
+
+```fiddleitm.runrules @all```
+
+## Updates rules manually
+
+This command lets you reload both ```rules.txt``` and ```localrules.txt``` without the need to restart fiddleitm:
+
+```fiddleitm.updaterules```
 
 ## Anti-VM detection and evasion
 
