@@ -68,7 +68,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "1.2"
+        version_local = "1.2.1"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -144,6 +144,7 @@ class Fiddleitm:
                 for item in response.text.split("\n"):
                     if "version_local =" in item:
                         version_online = item.strip().replace("version_local = \"", "")[:-1]
+                        break
                 if version_local != version_online:
                     # Play sound
                     print('\a', end = '')
