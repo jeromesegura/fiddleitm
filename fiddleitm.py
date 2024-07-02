@@ -48,20 +48,30 @@ import os
 import requests
 import re
 import mitmproxy
+import random
+import time
+from datetime import datetime
+from time import strftime, localtime
+import logging
+import typing
+import pyperclip
+from collections.abc import Sequence
+
 from mitmproxy import http
 from mitmproxy.addonmanager import Loader
 from mitmproxy import ctx
-import random
-from datetime import datetime
-import logging
-import typing
+from mitmproxy import command
+from mitmproxy import flow
+from mitmproxy import http
+from mitmproxy import hooks
+from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "1.1"
-        print('####################')
-        print('# fiddleitm v.' + version_local + '  #')
-        print('####################')
+        version_local = "1.2"
+        print('#################')
+        print('fiddleitm v.' + version_local)
+        print('#################')
         # Initialize variables
         self.rules = []
         self.anti_vm_list = [
@@ -69,51 +79,19 @@ class Fiddleitm:
             "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService",
             "VBoxTray", "Fiddler", "FSE2"
         ]
-        self.do_anti_vm = False
+        self.do_anti_vm = False        
+        # Call check internet connection function
         if self.internet_connection():
-            # Check for update
-            session = requests.Session()
-            session.trust_env = False
-            read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
-            response = session.get(read_version)
-            if response.status_code:
-                try:
-                    version_online = re.findall(r'version_local\s=\s.+', response.text)[0][17:20]
-                    if version_local != version_online:
-                        # Play sound
-                        print('\a', end = '')
-                        print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
-                except Exception:
-                    logging.error("Failed to read fiddleitm version")
-            # Load main rules
-            logging.info("Loading main rules...")
-            session = requests.Session()
-            session.trust_env = False
-            self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
-            response = session.get(self.rules_url)
-            if response.status_code:
-                rules = response.text.split('\r\n')
-                # Get rules date
-                rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
-                # Count number of rules
-                rules_counter = self.add_rules_list(rules)
-            logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
+            # Call check for fiddleitm update function
+            self.check_fiddleitm_update(version_local)
+            # Call load main rules function
+            self.load_main_rules()
         else:
-            logging.info('Offline mode')
-        # Load local rules (if file present)
-        logging.info("Loading local rules...")
-        if os.path.isfile('localrules.txt'):
-            with open('localrules.txt', 'r') as local_rules:
-                rules = local_rules.read().splitlines()
-                # Count number of rules
-                rules_counter = self.add_rules_list(rules)
-                if rules_counter == 0:
-                    logging.info(" -> no rules found!")
-                else:
-                    logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
-        else:
-            logging.info("No local rules found (localrules.txt)")
+            logging.info('Offline mode')       
+        # Call load local rules function
+        self.load_local_rules()
 
+    """ These are the command-line arguments"""
     def load(self, loader):
         loader.add_option(
             name="log_events",
@@ -145,7 +123,7 @@ class Fiddleitm:
             default=['tls', 'icon', 'path', 'method', 'status', 'size', 'comment', 'time'],
             help="use custom columns",
         )
-
+        
     """ Check for internet connection"""
     def internet_connection(self):
         try:
@@ -153,7 +131,56 @@ class Fiddleitm:
             response = requests.get("https://google.com", timeout=5)
             return True
         except requests.ConnectionError:
-            return False
+            return False        
+    
+    """ Check for fiddleitm update """
+    def check_fiddleitm_update(self, version_local):
+        session = requests.Session()
+        session.trust_env = False
+        read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
+        response = session.get(read_version)
+        if response.status_code:
+            try:
+                for item in response.text.split("\n"):
+                    if "version_local =" in item:
+                        version_online = item.strip().replace("version_local = \"", "")[:-1]
+                if version_local != version_online:
+                    # Play sound
+                    print('\a', end = '')
+                    print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
+            except Exception:
+                logging.error("Failed to read fiddleitm version")                
+    
+    """ Main rules are those stored in the GitHub repository """
+    def load_main_rules(self):
+        logging.info("Loading main rules...")
+        session = requests.Session()
+        session.trust_env = False
+        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
+        response = session.get(self.rules_url)
+        if response.status_code:
+            rules = response.text.split('\r\n')
+            # Get rules date
+            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
+            # Count number of rules
+            rules_counter = self.add_rules_list(rules)
+            logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
+
+    """ Local rules are your own, stored locally, on the same path as this script """
+    def load_local_rules(self):
+        # Load local rules (if file present)
+        logging.info("Loading local rules...")
+        if os.path.isfile('localrules.txt'):
+            with open('localrules.txt', 'r') as local_rules:
+                rules = local_rules.read().splitlines()
+                # Count number of rules
+                rules_counter = self.add_rules_list(rules)
+                if rules_counter == 0:
+                    logging.info(" -> no rules found!")
+                else:
+                    logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
+        else:
+            logging.info("No local rules found (localrules.txt)")
 
     """ Add remote and local rules """
     def add_rules_list(self, rules):
@@ -166,7 +193,16 @@ class Fiddleitm:
                 rules_counter += 1
         return rules_counter
 
-    """ anti-vm """
+    """ Convert epoch time to friendly format """
+    def convert_epoch(self,epoch_time):
+        seconds = int(epoch_time)
+        milliseconds = int((epoch_time - seconds) * 1000)  # convert to milliseconds
+        temp_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(seconds))  # format in UTC
+        formatted_timestamp = f"{temp_timestamp}.{milliseconds:03d}"
+        return formatted_timestamp
+
+
+    """ Anti-vm replaces certain keywords used for VM detection """
     def anti_vm(self, flow):
         request_response = flow.request.text
         modified_request_response = request_response
@@ -181,14 +217,14 @@ class Fiddleitm:
                 break
         return modified_request_response
 
-    """ Check conditions """
+    """ Check conditions based on both main and local rules """
     def check_rules(self, flow):
         # Loop through rules
         for rule in self.rules:
             # Create list of elements for each rule
             elements_list = rule.split("; ")
             # get rule name
-            rule_name = elements_list[0].strip("rule_name = ").strip('"')
+            rule_name = elements_list[0].replace("rule_name = \"", "")[:-1]
             # remove rule name from elements_list
             elements_list.pop(0)
             # get emoji_name if it's there by finding its index in the list
@@ -197,7 +233,7 @@ class Fiddleitm:
                 # convert it to an integer
                 emoji_index = int(''.join(map(str, emoji_index_list)))
                 # get emoji_name value
-                emoji_name = elements_list[emoji_index].strip("emoji_name = ").strip('"')
+                emoji_name = elements_list[emoji_index].replace("emoji_name = \"", "")[:-1]
                 # remove emoji name from elements_list
                 elements_list.pop(emoji_index)
             else:
@@ -206,7 +242,7 @@ class Fiddleitm:
             matched_condition = False
             for condition in elements_list:
                 if "host_name = \"" in condition:
-                    host_name_string = condition.strip("host_name = ").strip('"')
+                    host_name_string = condition.replace("host_name = \"", "")[:-1]
                     matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
                     if matched_condition == False:
                         break
@@ -216,7 +252,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "host_ip = \"" in condition:
-                    host_ip_string = condition.strip("host_ip = ").strip('"')
+                    host_ip_string = condition.replace("host_ip = \"", "")[:-1]
                     matched_condition = self.check_host_ip_string(flow, rule_name, host_ip_string)
                     if matched_condition == False:
                         break
@@ -226,7 +262,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "response_body = \"" in condition:
-                    response_body_string = condition.strip("response_body = ").strip('"')
+                    response_body_string = condition.replace("response_body = \"", "")[:-1].replace("\\\"", "\"").replace("\\'", "'").replace("\\\\", "\\")
                     matched_condition = self.check_response_body_string(flow, rule_name, response_body_string)
                     if matched_condition == False:
                         break
@@ -236,7 +272,7 @@ class Fiddleitm:
                     if matched_condition == False:
                         break
                 if "full_url = \"" in condition:
-                    full_url_string = condition.strip("full_url = ").strip('"')
+                    full_url_string = condition.replace("full_url = \"", "")[:-1]
                     matched_condition = self.check_full_url_string(flow, rule_name, full_url_string)
                     if matched_condition == False:
                         break
@@ -250,7 +286,7 @@ class Fiddleitm:
             if matched_condition:
                 # Call mark_flow function
                 self.mark_flow(flow, rule_name, emoji_name)
-
+    
     """ Check for hostname condition (string) """
     def check_hostname_string(self, flow, rule_name, host_name_string):
         if host_name_string in flow.request.host:
@@ -332,23 +368,40 @@ class Fiddleitm:
         # Play sound
         print('\a', end = '')
         # Print detection name in console
-        print(rule_name)
+        print(rule_name + " found in: " + flow.request.pretty_url)
         # Mark flow in web UI
         if emoji_name is not None:
             flow.marked = emoji_name
         else:
-            flow.marked = ":red:"
+            flow.marked = ":red_circle:"
         flow.comment = rule_name
         # Log events to file
         if ctx.options.log_events:
-            get_referer = flow.request.headers.get("referer")
-            if get_referer is not None:
-                referer = get_referer
-            else:
-                referer = 'N/A'
+            # Assign default values
+            epochtime, comment, referer, ipaddress, servername = (value for value in ["", "", "", "", ""])
+            if flow.timestamp_created is not None:
+                epochtime = str(int(flow.timestamp_created))
+                if epochtime is None:
+                    epochtime = "N/A"
+                
+            if flow.server_conn.peername is not None:
+                ipaddress = flow.server_conn.peername[0]
+                if ipaddress is None:
+                    ipaddress = "N/A"
+                
+            if flow.response is not None and flow.response.headers:            
+                servername = flow.response.headers.get("server")
+                if servername is None:
+                    servername = "N/A"
+            if flow.response is not None and flow.response.headers:
+                    referer = flow.request.headers.get("referer")
+                    if referer is None:
+                        referer = "N/A"
+            if flow.comment is None or flow.comment == "":
+                comment = "N/A"
+            # Write to file
             with open("rules.log", 'a') as rules_log:
-                date_time = datetime.now().strftime("%m/%d/%Y %H:%M")
-                rules_log.write(date_time + ',' + rule_name + ',' + flow.request.pretty_url + ',' + referer + '\n')
+                rules_log.write(epochtime + "," + ipaddress + "," + servername + "," + flow.request.pretty_url + "," + referer + "," + comment + '\n')
         # Check if anti-vm was detected
         if "Fingerprinting" in flow.comment:
             self.do_anti_vm = True
@@ -376,5 +429,69 @@ class Fiddleitm:
     def response(self, flow: http.HTTPFlow) -> None:
         # call function to check for rules
         self.check_rules(flow)
+
+    """ Begin commands """
+    """ For mitmweb, go to Options and select Display Command Bar.
+        It will add a command line at the bottom of the browser window.
+        Type commands like this: fiddleitm.commandname @all/@shown/@focus/@hidden/@marked/@unmarked
+    """
+
+    """ This command copies to the clipboard any URL that had a detection """
+    @command.command("fiddleitm.printurls")
+    def printurls(self, flows: Sequence[flow.Flow]) -> None:
+        self.traffic_summary = []
+        for f in flows:
+            if isinstance(f, http.HTTPFlow):
+                if f.comment != "":
+                    self.traffic_summary.append(f.request.pretty_url + "," + f.comment)
+        """ Check list is not empty """
+        if len(self.traffic_summary) > 0:
+            pyperclip.copy('\n'.join(self.traffic_summary))
+            logging.log(ALERT, "Copied detected flows to clipboard")
+        else:
+            logging.log(ALERT, "There was nothing to copy")
+        return None
+    
+    """ This command runs rules against the current flows"""
+    @command.command("fiddleitm.runrules")
+    def runrules(self, flows: Sequence[flow.Flow]) -> None:
+        # call function to reload rules
+        self.rules = []
+        self.load_main_rules()
+        self.load_local_rules()
+        for f in flows:
+            if isinstance(f, http.HTTPFlow):
+                self.check_rules(f)
+        ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
+    
+    """ This command updates both main and local rules """
+    @command.command("fiddleitm.updaterules")
+    def updaterules(self) -> None:
+        # call function to reload rules
+        self.rules = []
+        self.load_main_rules()
+        self.load_local_rules() 
+    
+    """ This command searches through flows using a regex expression """
+    @command.command("fiddleitm.search")
+    def search(
+        self,
+        flows: Sequence[flow.Flow],
+        searchquery: str,
+    ) -> None:
+        for f in flows:
+            if isinstance(f, http.HTTPFlow):
+                # Search within the flow's response body
+                try:
+                    if f.response and f.response.content and "Content-Type" in f.response.headers and \
+                     ("text" in f.response.headers["Content-Type"] or "javascript" in f.response.headers["Content-Type"]):
+                        if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
+                            print(searchquery + " found in: " + f.request.pretty_url)
+                            f.marked = ":purple_circle:"
+                            f.comment = "Match for: " + searchquery
+                except Exception:
+                    logging.error("error while decoding content ")
+        print("Done searching")
+        ctx.master.addons.trigger(hooks.UpdateHook(flows))
 
 addons = [Fiddleitm()]
