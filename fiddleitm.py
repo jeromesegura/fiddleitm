@@ -68,7 +68,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "1.2.1"
+        version_local = "1.2.2"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -398,11 +398,9 @@ class Fiddleitm:
                     referer = flow.request.headers.get("referer")
                     if referer is None:
                         referer = "N/A"
-            if flow.comment is None or flow.comment == "":
-                comment = "N/A"
             # Write to file
             with open("rules.log", 'a') as rules_log:
-                rules_log.write(epochtime + "," + ipaddress + "," + servername + "," + flow.request.pretty_url + "," + referer + "," + comment + '\n')
+                rules_log.write(epochtime + "," + ipaddress + "," + servername + "," + flow.request.pretty_url + "," + referer + "," + flow.comment + "\n")
         # Check if anti-vm was detected
         if "Fingerprinting" in flow.comment:
             self.do_anti_vm = True
