@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-07-02
+# Last updated: 2024-07-05
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -49,12 +49,12 @@ rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF
 rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "appendChild(a)}))})"; response_body = /window,"\w{64}"/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
+rule_name = "Atob URL skimmer"; response_body = "atob(\"aHR0cHM"; response_body = "onepagecheckout"; emoji_name = ":credit_card:"
+rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 
 # Fingerprinting
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
 
 # Misc
-rule_name = "Google DNS lookup"; full_url = "dns.google/resolve"
-rule_name = "IP check"; full_url = "api64.ipify.org/"
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
 rule_name = "Click tracker"; full_url = /onelink\.me|kochava\.com|gotrackier\.com/; full_url = "gad_source"; emoji_name = ":computer_mouse:"
