@@ -1,4 +1,4 @@
-# fiddleitm v.1.2.2
+# fiddleitm v.0.1
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
