@@ -68,7 +68,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "1.2.2"
+        version_local = "0.1"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
