@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-07-07
+# Last updated: 2024-07-08
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -14,14 +14,10 @@ rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*
 rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
 rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
 rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
-rule_name = "ClearFake injection"; response_body = "base64,YXN5bmMgZnVuY3"
-rule_name = "ClearFake redirect"; response_body = "remove_iframe=e"; response_body = "["z-index"]="99999999999""
-rule_name = "ClearFake crt"; full_url = "certificate.crt"; response_body = "I1IIll1l"
-rule_name = "ClearFake template"; full_url = /\/\w{92}\.html$/; response_body = "fbzMcFZ1IkLk"
+rule_name = "ClearFake injection"; response_body = "base64,ZnVuY3Rpb24gXzB4"; response_body= "J2V0aF9jYWxs"
+rule_name = "ClearFake iframe"; response_body = "var payload = atob"; response_body = "function copyCode()"
 rule_name = "FIN7 phishing page"; response_body = "Requires Browser Extension"; response_body = /special\s[bB]rowser\s[eE]xtension/; emoji_name = ":fish:"
-rule_name = "Binance"; full_url = "https://bsc-dataseed1.binance.org/"
-rule_name = "ClearFake iframe"; full_url = "/8OtaBr/"
-rule_name = "ClearFake lander"; full_url = "/bvxny6R6"
+rule_name = "Binance"; full_url = /bsc-dataseed1\.binance\.org|bsc-dataseed3\.defibit\.io/
 rule_name = "Kongtuke JS"; response_body = "&refferer"; response_body = "/js.php?device="
 rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
 # Look for base64 version of this: https://cdn.ethers.io/lib/ethers-5.2.umd.min.js
@@ -52,8 +48,9 @@ rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body
 rule_name = "Atob URL skimmer"; response_body = "atob(\"aHR0cHM"; response_body = "onepagecheckout"; emoji_name = ":credit_card:"
 rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 
-# Fingerprinting
+# Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
+rule_name = "Obfuscation"; response_body = "base64,ZnVuY3Rpb24gXzB4"
 
 # Misc
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
