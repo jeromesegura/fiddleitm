@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-07-20
+# Last updated: 2024-07-24
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -22,6 +22,8 @@ rule_name = "Kongtuke JS"; response_body = "&refferer"; response_body = "/js.php
 rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
 rule_name = "ClickFix"; full_url = "node-api-1o7y.onrender.com"; emoji_name = ":fish:"
 rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O"; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates (hacked site)"; response_body = "/win/jj.js\"></script>"; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
 
 # Social engineering (phishing)
 rule_name = "Tycoon (Microsoft)"; response_body = /function tryfindingele/
