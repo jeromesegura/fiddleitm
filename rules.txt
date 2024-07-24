@@ -24,7 +24,7 @@ rule_name = "ClickFix"; full_url = "node-api-1o7y.onrender.com"; emoji_name = ":
 rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates (hacked site)"; response_body = "/win/jj.js\"></script>"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
-rule_name = "SuperCool FakeUpdates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"
+rule_name = "SuperCool Fake Updates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"; emoji_name = ":fish:"
 
 # Social engineering (phishing)
 rule_name = "Tycoon (Microsoft)"; response_body = /function tryfindingele/
