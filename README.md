@@ -115,7 +115,7 @@ This command lets you reload both ```rules.txt``` and ```localrules.txt``` witho
 
 ## Connect-the-dots
 
-This command helps you retrace each step that lead to a particular flow:
+This command helps you retrace each step that lead to a particular flow (requires mitmproxy v10.4.0):
 
 ```fiddleitm.connect @all [flow #]```
 
