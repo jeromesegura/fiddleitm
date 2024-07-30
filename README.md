@@ -1,4 +1,4 @@
-# fiddleitm v.0.1
+# fiddleitm v.0.2
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -104,6 +104,14 @@ This command executes rules (both ```rules.txt``` and ```localrules.txt```) on t
 This command lets you reload both ```rules.txt``` and ```localrules.txt``` without the need to restart fiddleitm:
 
 ```fiddleitm.updaterules```
+
+## Connect-the-dots
+
+This command helps you retrace each step that lead to a particular flow
+
+```fiddleitm.connect @all [flow #]``
+
+![image](https://github.com/user-attachments/assets/4124b61a-e11e-4de5-999c-4b10cfff4dfb)
 
 ## Anti-VM detection and evasion
 
