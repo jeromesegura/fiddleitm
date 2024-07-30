@@ -71,9 +71,9 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; emoji_name = ":grapes:"``
 
-## Updater (since v.02)
+## Automatic updater
 
-If a new version of fiddleitm is available, you will get prompted to install it whenever you run the script:
+Since v.0.2, if a new version of fiddleitm is available, you will get prompted to install it whenever you run the script:
 
 ![image](https://github.com/user-attachments/assets/e4394475-d9e8-4d5e-98a2-ee4cc5dafd57)
 
