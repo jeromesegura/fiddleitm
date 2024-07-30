@@ -107,9 +107,9 @@ This command lets you reload both ```rules.txt``` and ```localrules.txt``` witho
 
 ## Connect-the-dots
 
-This command helps you retrace each step that lead to a particular flow
+This command helps you retrace each step that lead to a particular flow:
 
-```fiddleitm.connect @all [flow #]``
+```fiddleitm.connect @all [flow #]```
 
 ![image](https://github.com/user-attachments/assets/4124b61a-e11e-4de5-999c-4b10cfff4dfb)
 
