@@ -47,7 +47,6 @@ Syntax for rules:
 import os
 import requests
 import re
-import mitmproxy
 import random
 import time
 from datetime import datetime
@@ -56,19 +55,23 @@ import logging
 import typing
 import pyperclip
 from collections.abc import Sequence
+import tempfile
+import shutil
+import mitmproxy
 
 from mitmproxy import http
-from mitmproxy.addonmanager import Loader
 from mitmproxy import ctx
 from mitmproxy import command
 from mitmproxy import flow
 from mitmproxy import http
 from mitmproxy import hooks
+from mitmproxy.addonmanager import Loader
+from mitmproxy.ctx import master
 from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.1"
+        version_local = "0.2"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -82,6 +85,8 @@ class Fiddleitm:
         self.do_anti_vm = False        
         # Call check internet connection function
         if self.internet_connection():
+            # Call check for latest mitmproxy version
+            self.check_mitmproxy_version()
             # Call check for fiddleitm update function
             self.check_fiddleitm_update(version_local)
             # Call load main rules function
@@ -120,7 +125,7 @@ class Fiddleitm:
         loader.add_option(
             name = "web_columns",
             typespec=typing.Sequence[str],
-            default=['tls', 'icon', 'path', 'method', 'status', 'size', 'comment', 'time'],
+            default=['index', 'icon', 'path', 'method', 'status', 'size', 'comment', 'time'],
             help="use custom columns",
         )
         
@@ -131,7 +136,17 @@ class Fiddleitm:
             response = requests.get("https://google.com", timeout=5)
             return True
         except requests.ConnectionError:
-            return False        
+            return False
+
+    """ Check for the latest version of mitmproxy """
+    def check_mitmproxy_version(self):
+        response = requests.get("https://github.com/mitmproxy/mitmproxy/releases/latest")
+        if response.status_code:
+            try:
+                mitmproxy_version = response.url.split("/").pop()
+                print('->> The latest version for mitmproxy is: ' + mitmproxy_version)
+            except Exception:
+                logging.error("Failed to read latest mitmproxy version")                
     
     """ Check for fiddleitm update """
     def check_fiddleitm_update(self, version_local):
@@ -148,9 +163,31 @@ class Fiddleitm:
                 if version_local != version_online:
                     # Play sound
                     print('\a', end = '')
-                    print('->> A new version of fiddleitm is available (v.' + version_online + ')!')
+                    print('->> A new version of fiddleitm is available from the GitHub repo: v' + version_online + '!')
+                    answer = input('Would you like to install it now? (y/n)\n') 
+                    if answer == "y":
+                        print(f"Installing v." + version_online + "...")
+                        url = "https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py"
+                        filename = "fiddleitm.py"
+                        try:
+                            # Download to a temporary file
+                            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                                response = requests.get(url)
+                                response.raise_for_status()  # Raise an exception for non-2xx status codes
+                                temp_file.write(response.content)
+
+                            # Replace the original file with the downloaded content
+                            shutil.copy2(temp_file.name, filename)
+
+                            print(f"Downloaded and replaced {filename} successfully!")
+                        except requests.exceptions.RequestException as e:
+                            print(f"Error downloading {filename}: {e}")
+                        finally:
+                            # Clean up the temporary file
+                            if temp_file.name and os.path.exists(temp_file.name):
+                                os.remove(temp_file.name)
             except Exception:
-                logging.error("Failed to read fiddleitm version")                
+                logging.error("Failed to read fiddleitm version")
     
     """ Main rules are those stored in the GitHub repository """
     def load_main_rules(self):
@@ -369,7 +406,7 @@ class Fiddleitm:
         # Play sound
         print('\a', end = '')
         # Print detection name in console
-        print(rule_name + " found in: " + flow.request.pretty_url)
+        print(f"{rule_name} found in flow #{str(master.view.index(flow)+1)}")
         # Mark flow in web UI
         if emoji_name is not None:
             flow.marked = emoji_name
@@ -480,17 +517,89 @@ class Fiddleitm:
     ) -> None:
         for f in flows:
             if isinstance(f, http.HTTPFlow):
+                # Search within the flow's response headers
+                try:
+                    if f.response is not None and f.response.headers:            
+                        location = f.response.headers.get("location")
+                        if re.search(searchquery, location, flags=re.IGNORECASE):
+                            print(f"{searchquery} found in response headers for flow #{master.view.index(f)+1}")
+                            f.marked = ":purple_circle:"
+                            f.comment = "Found: " + searchquery
+                except Exception:
+                    logging.error("error while searching response headers")
+                        
                 # Search within the flow's response body
                 try:
                     if f.response and f.response.content and "Content-Type" in f.response.headers and \
                      ("text" in f.response.headers["Content-Type"] or "javascript" in f.response.headers["Content-Type"]):
                         if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
-                            print(searchquery + " found in: " + f.request.pretty_url)
+                            print(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
                             f.marked = ":purple_circle:"
-                            f.comment = "Match for: " + searchquery
+                            f.comment = "Found: " + searchquery
                 except Exception:
-                    logging.error("error while decoding content ")
+                    logging.error("error while searching response body")
         print("Done searching")
         ctx.master.addons.trigger(hooks.UpdateHook(flows))
-
+        
+    """ This command runs connect-the-dots"""
+    @command.command("fiddleitm.connect")
+    def connectdots(self, flows: Sequence[flow.Flow], last_flow: int) -> None:
+        print("Running connect-the-dots...")
+        connect_index = []
+        for f in reversed(flows):
+            if isinstance(f, http.HTTPFlow):
+                flow_index = master.view.index(f)+1
+                # Get last flow hostname
+                if flow_index == last_flow:
+                    current_hostname = f.request.host
+                    # Add to list
+                    connect_index.append(flow_index)
+                
+                # Search previous sessions
+                
+                # Search within the flow's hostname
+                try:
+                    if re.search(current_hostname, f.request.host, flags=re.IGNORECASE):
+                        # Add to list
+                        connect_index.append(flow_index)
+                except Exception:
+                    pass
+                
+                # Search within the flow's response headers
+                try:
+                    if f.response is not None and f.response.headers:            
+                        location = f.response.headers.get("location")
+                        if re.search(current_hostname, location, flags=re.IGNORECASE):
+                            # Assign new hostname to look for
+                            current_hostname = f.request.host
+                            # Add to list
+                            connect_index.append(flow_index)
+                            
+                except Exception:
+                    pass
+                # Search within the flow's response body
+                try:
+                    if f.response and f.response.content and "Content-Type" in f.response.headers and \
+                     ("text" in f.response.headers["Content-Type"] or "javascript" in f.response.headers["Content-Type"]):
+                        if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
+                            # Assign new hostname to look for
+                            current_hostname = f.request.host
+                            # Add to list
+                            connect_index.append(flow_index)
+                except Exception:
+                    pass
+                    
+        # Loop through flows again to assign numbers
+        number = 1
+        for f in flows:
+            # Check if the current flow index matches with the flow from our list
+            if isinstance(f, http.HTTPFlow):
+                flow_index = master.view.index(f)+1
+                if flow_index in connect_index:
+                    pattern = r'\(\d+\)'
+                    f.comment = f"({number}) {re.sub(pattern, '', f.comment)}"
+                    number +=1 
+        ctx.master.addons.trigger(hooks.UpdateHook(flows))
+        print("Done!")
+        
 addons = [Fiddleitm()]
