@@ -71,6 +71,14 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 ``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; emoji_name = ":grapes:"``
 
+## Updater (since v.02)
+
+If a new version of fiddleitm is available, you will get prompted to install it whenever you run the script:
+
+![image](https://github.com/user-attachments/assets/e4394475-d9e8-4d5e-98a2-ee4cc5dafd57)
+
+The updater also displays the latest version of mitmproxy.
+
 ## Search within the body content of each flow
 
 This feature is not currently supported in mitmweb, but fiddleitm provides a way to search using a regex via a command. You first need to enable the command line in the UI, by going to Options -> Display Command Bar.
