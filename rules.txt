@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-07-24
+# Last updated: 2024-08-01
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -26,13 +26,6 @@ rule_name = "SuperCool Fake Updates (hacked site)"; response_body = "/win/jj.js\
 rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"; emoji_name = ":fish:"
 
-# Social engineering (phishing)
-rule_name = "Tycoon (Microsoft)"; response_body = /function tryfindingele/
-rule_name = "Tycoon (Microsoft)"; response_body = /function selectmultipleaccountadfs/
-rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/
-rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"
-rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"
-
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 rule_name = "TSS redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
@@ -44,7 +37,7 @@ rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF
 rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "appendChild(a)}))})"; response_body = /window,"\w{64}"/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
-rule_name = "Atob URL skimmer"; response_body = "atob(\"aHR0cHM"; response_body = "onepagecheckout"; emoji_name = ":credit_card:"
+rule_name = "Atob URL skimmer"; response_body = "atob"; response_body = "aHR0cHM"; response_body = "checkout"; emoji_name = ":credit_card:"
 rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 
 # Fingerprinting/obfuscation
