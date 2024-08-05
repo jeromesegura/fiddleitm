@@ -38,7 +38,7 @@ rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF
 rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "appendChild(a)}))})"; response_body = /window,"\w{64}"/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
-rule_name = "Atob URL skimmer"; response_body = "atob"; response_body = "aHR0cHM"; response_body = "checkout"; emoji_name = ":credit_card:"
+#rule_name = "Atob URL skimmer"; response_body = "atob"; response_body = "aHR0cHM"; response_body = "checkout"; emoji_name = ":credit_card:"
 rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 rule_name = "img skimmer"; response_body = "fkhfnrxw"; response_body = "rqhsdjh"; emoji_name = ":credit_card:"
 
