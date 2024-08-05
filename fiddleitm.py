@@ -71,7 +71,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2"
+        version_local = "0.2.1"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -405,8 +405,11 @@ class Fiddleitm:
     def mark_flow(self, flow, rule_name, emoji_name):
         # Play sound
         print('\a', end = '')
-        # Print detection name in console
-        print(f"{rule_name} found in flow #{str(master.view.index(flow)+1)}")
+        try:
+            # Print detection name in console
+            print(f"{rule_name} found in flow #{str(master.view.index(flow)+1)}")
+        except Exception:
+            logging.error("No view attribute in mitmdump")
         # Mark flow in web UI
         if emoji_name is not None:
             flow.marked = emoji_name
