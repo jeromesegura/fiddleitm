@@ -1,5 +1,12 @@
 # Release History
 
+## August 9 2024: fiddleitm 0.2.2
+
+- Added new command to clear all comments from mitmweb UI (fiddleitm.clear @all)
+- Improved connect-the-dots feature
+- Added filters (filters.txt) to skip certain hostnames causing decoding errors
+- Added rule scanning for content-type: application/json
+
 ## August 5 2024: fiddleitm 0.2.1
 
 - Fixed a bug that would occur if you ran mitmdump using the new index column ids
