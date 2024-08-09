@@ -33,7 +33,7 @@ rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 rule_name = "Tech scam redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
 rule_name = "Tech scam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
 rule_name = "Tech Scam2"; response_body = "W0in0sNw0Shu1Er887"
-rule_name = "Tech Scam3"; full_url = /M0ac0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
+rule_name = "Tech Scam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
 
 # Web skimming
 rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
