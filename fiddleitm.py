@@ -71,7 +71,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.2"
+        version_local = "0.2.3"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -605,7 +605,7 @@ class Fiddleitm:
     def connectdots(self, flows: Sequence[flow.Flow], last_flow: int) -> None:
         print("Running connect-the-dots...")
         connect_index = []
-        current_hostname = ''
+        found_last_flow = False
         for f in reversed(flows):
             if isinstance(f, http.HTTPFlow):
                 flow_index = master.view.index(f)+1
@@ -614,46 +614,47 @@ class Fiddleitm:
                     current_hostname = f.request.host
                     # Add to list
                     connect_index.append(flow_index)
+                    # Mark as found
+                    found_last_flow = True
                 
-                # Search previous sessions
-                
-                # Search within the flow's hostname
-                try:
-                    if current_hostname:
+                # Search previous sessions if we found the last flow
+                if found_last_flow:
+                    # Search within the flow's hostname
+                    try:
                         if re.search(current_hostname, f.request.host, flags=re.IGNORECASE):
                             # Add to list
                             connect_index.append(flow_index)
-                except Exception:
-                    logging.error("error connect-the-dots flow's hostname: " + f.request.pretty_url)
-                
-                # Search within the flow's response headers
-                try:
-                    if f.response:
-                        if "location" in f.response.headers:           
-                            location = f.response.headers.get("location")
-                            if re.search(current_hostname, location, flags=re.IGNORECASE):
-                                # Assign new hostname to look for
-                                current_hostname = f.request.host
-                                # Add to list
-                                connect_index.append(flow_index)                       
-                except Exception:
-                    logging.error("error connect-the-dots response headers: " + f.request.pretty_url)
-                # Search within the flow's response body
-                try:
-                    if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                    except Exception:
+                        logging.error("error connect-the-dots flow's hostname: " + f.request.pretty_url)
+                    
+                    # Search within the flow's response headers
+                    try:
                         if f.response:
-                            if f.response.content:
-                                if "Content-Type" in f.response.headers:
-                                    if "text" in f.response.headers["Content-Type"] or \
-                                       "javascript" in f.response.headers["Content-Type"] or \
-                                       "json" in f.response.headers["Content-Type"]:
-                                        if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
-                                            # Assign new hostname to look for
-                                            current_hostname = f.request.host
-                                            # Add to list
-                                            connect_index.append(flow_index)
-                except Exception:
-                    logging.error("error connect-the-dots response body: " + f.request.pretty_url)
+                            if "location" in f.response.headers:           
+                                location = f.response.headers.get("location")
+                                if re.search(current_hostname, location, flags=re.IGNORECASE):
+                                    # Assign new hostname to look for
+                                    current_hostname = f.request.host
+                                    # Add to list
+                                    connect_index.append(flow_index)                       
+                    except Exception:
+                        logging.error("error connect-the-dots response headers: " + f.request.pretty_url)
+                    # Search within the flow's response body
+                    try:
+                        if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                            if f.response:
+                                if f.response.content:
+                                    if "Content-Type" in f.response.headers:
+                                        if "text" in f.response.headers["Content-Type"] or \
+                                           "javascript" in f.response.headers["Content-Type"] or \
+                                           "json" in f.response.headers["Content-Type"]:
+                                            if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
+                                                # Assign new hostname to look for
+                                                current_hostname = f.request.host
+                                                # Add to list
+                                                connect_index.append(flow_index)
+                    except Exception:
+                        logging.error("error connect-the-dots response body: " + f.request.pretty_url)
                     
         # Loop through flows again to assign numbers
         number = 1
