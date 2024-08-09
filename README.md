@@ -121,6 +121,12 @@ This command helps you retrace each step that lead to a particular flow (require
 
 ![image](https://github.com/user-attachments/assets/4124b61a-e11e-4de5-999c-4b10cfff4dfb)
 
+## Clear comments
+
+This command clears all comments from flow:
+
+```fiddleitm.clear @all```
+
 ## Anti-VM detection and evasion
 
 Threat actors can use JavaScript code to fingerprint visitors and detect if they are running a virtual machine (VMware, VirtualBox). In some instances, this works by collecting information such as video drivers, renders, etc. and then sending that information backed to the server via a POST request.
