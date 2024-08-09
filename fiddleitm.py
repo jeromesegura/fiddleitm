@@ -71,12 +71,13 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.1"
+        version_local = "0.2.2"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
         # Initialize variables
         self.rules = []
+        self.filters = []
         self.anti_vm_list = [
             "VMware", "vmtoolsd", "VMwareService", "Vmwaretray", "vm3dservice",
             "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService",
@@ -91,6 +92,8 @@ class Fiddleitm:
             self.check_fiddleitm_update(version_local)
             # Call load main rules function
             self.load_main_rules()
+            # Call filters function
+            self.load_filters()
         else:
             logging.info('Offline mode')       
         # Call load local rules function
@@ -203,7 +206,32 @@ class Fiddleitm:
             # Count number of rules
             rules_counter = self.add_rules_list(rules)
             logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
+            
+    """ Filters stored in the GitHub repository """
+    def load_filters(self):
+        logging.info("Loading filters...")
+        session = requests.Session()
+        session.trust_env = False
+        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/filters.txt'
+        response = session.get(self.rules_url)
+        if response.status_code:
+            filters = response.text.split('\r\n')
+            # Count number of filters
+            filters_counter = self.add_filters_list(filters)
+            logging.info(" -> " + str(filters_counter) + " filters loaded successfully")
 
+    """ Function to check for filters """
+    def check_filters(self, flow):
+        # Check filters
+        if flow.request.pretty_url == "https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt" or \
+           flow.request.pretty_url == "https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt":
+            return True
+        for filter in self.filters:
+            if filter == flow.request.host:
+                return True
+                break
+        return False
+    
     """ Local rules are your own, stored locally, on the same path as this script """
     def load_local_rules(self):
         # Load local rules (if file present)
@@ -230,6 +258,16 @@ class Fiddleitm:
                 self.rules.append(rule)
                 rules_counter += 1
         return rules_counter
+        
+    """ Add filters """
+    def add_filters_list(self, filters):
+        filters_counter = 0
+        for filter in filters:
+            filter = filter.rstrip('\n')
+            # Add filters
+            self.filters.append(filter)
+            filters_counter += 1
+        return filters_counter
 
     """ Convert epoch time to friendly format """
     def convert_epoch(self,epoch_time):
@@ -363,13 +401,17 @@ class Fiddleitm:
     def check_response_body_string(self, flow, rule_name, response_body_string):
         # Only check if response exists and matches content-type
         try:
-            if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
-                 ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
-                if response_body_string in flow.response.text:
-                    return True
-                else:
-                    return False
+            if "malwareinfosec/fiddleitm/" not in flow.request.pretty_url:
+                if flow.response:
+                    if flow.response.content:
+                        if "Content-Type" in flow.response.headers:
+                            if "text" in flow.response.headers["Content-Type"] or \
+                               "javascript" in flow.response.headers["Content-Type"] or \
+                               "json" in flow.response.headers["Content-Type"]:
+                                if response_body_string in flow.response.text:
+                                    return True
+                                else:
+                                    return False
         except Exception:
             logging.error("error while decoding content (string) " + flow.request.pretty_url)
 
@@ -377,13 +419,17 @@ class Fiddleitm:
     def check_response_body_regex(self, flow, rule_name, response_body_regex):
         # Only check if response exists and matches content-type
         try:
-            if flow.response and flow.response.content and "Content-Type" in flow.response.headers and \
-                "malwareinfosec/fiddleitm/" not in flow.request.pretty_url and \
-                 ("text" in flow.response.headers["Content-Type"] or "javascript" in flow.response.headers["Content-Type"]):
-                if re.search(response_body_regex, flow.response.text):
-                    return True
-                else:
-                    return False
+            if "malwareinfosec/fiddleitm/" not in flow.request.pretty_url:
+                if flow.response:
+                    if flow.response.content:
+                        if "Content-Type" in flow.response.headers:
+                            if "text" in flow.response.headers["Content-Type"] or \
+                               "javascript" in flow.response.headers["Content-Type"] or \
+                               "json" in flow.response.headers["Content-Type"]:
+                                if re.search(response_body_regex, flow.response.text):
+                                    return True
+                                else:
+                                    return False
         except Exception:
             logging.error("error while decoding content (regex) " + flow.request.pretty_url)
 
@@ -449,25 +495,28 @@ class Fiddleitm:
 
     """ flow request """
     def request(self, flow: http.HTTPFlow) -> None:
-        # Override user-agent if needed
-        if ctx.options.custom_user_agent:
-            flow.request.headers["user-agent"] = ctx.options.custom_user_agent
-        # Override referer if needed
-        if ctx.options.custom_referer:
-            flow.request.headers["Referer"] = ctx.options.custom_referer
-        # Override accept-language if needed
-        if ctx.options.custom_accept_language:
-            flow.request.headers["accept-language"] = ctx.options.custom_accept_language
-        # Do anti-vm
-        if self.do_anti_vm:
-            flow.request.text = self.anti_vm(flow)
-            # Setting setting to false
-            self.do_anti_vm = False
+        # Check filters
+        if not self.check_filters(flow):
+            # Override user-agent if needed
+            if ctx.options.custom_user_agent:
+                flow.request.headers["user-agent"] = ctx.options.custom_user_agent
+            # Override referer if needed
+            if ctx.options.custom_referer:
+                flow.request.headers["Referer"] = ctx.options.custom_referer
+            # Override accept-language if needed
+            if ctx.options.custom_accept_language:
+                flow.request.headers["accept-language"] = ctx.options.custom_accept_language
+            # Do anti-vm
+            if self.do_anti_vm:
+                flow.request.text = self.anti_vm(flow)
+                # Setting setting to false
+                self.do_anti_vm = False
 
     """ flow response """
     def response(self, flow: http.HTTPFlow) -> None:
-        # call function to check for rules
-        self.check_rules(flow)
+        # Check filters
+        if not self.check_filters(flow):
+            self.check_rules(flow)
 
     """ Begin commands """
     """ For mitmweb, go to Options and select Display Command Bar.
@@ -500,7 +549,9 @@ class Fiddleitm:
         self.load_local_rules()
         for f in flows:
             if isinstance(f, http.HTTPFlow):
-                self.check_rules(f)
+                # Check filters
+                if not self.check_filters(f):
+                    self.check_rules(f)
         ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
     
     """ This command updates both main and local rules """
@@ -509,7 +560,7 @@ class Fiddleitm:
         # call function to reload rules
         self.rules = []
         self.load_main_rules()
-        self.load_local_rules() 
+        self.load_local_rules()
     
     """ This command searches through flows using a regex expression """
     @command.command("fiddleitm.search")
@@ -533,12 +584,17 @@ class Fiddleitm:
                         
                 # Search within the flow's response body
                 try:
-                    if f.response and f.response.content and "Content-Type" in f.response.headers and \
-                     ("text" in f.response.headers["Content-Type"] or "javascript" in f.response.headers["Content-Type"]):
-                        if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
-                            print(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
-                            f.marked = ":purple_circle:"
-                            f.comment = "Found: " + searchquery
+                    if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                        if f.response:
+                            if f.response.content:
+                                if "Content-Type" in f.response.headers:
+                                    if "text" in f.response.headers["Content-Type"] or \
+                                       "javascript" in f.response.headers["Content-Type"] or \
+                                       "json" in f.response.headers["Content-Type"]:
+                                        if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
+                                            print(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
+                                            f.marked = ":purple_circle:"
+                                            f.comment = "Found: " + searchquery
                 except Exception:
                     logging.error("error while searching response body")
         print("Done searching")
@@ -549,6 +605,7 @@ class Fiddleitm:
     def connectdots(self, flows: Sequence[flow.Flow], last_flow: int) -> None:
         print("Running connect-the-dots...")
         connect_index = []
+        current_hostname = ''
         for f in reversed(flows):
             if isinstance(f, http.HTTPFlow):
                 flow_index = master.view.index(f)+1
@@ -562,35 +619,41 @@ class Fiddleitm:
                 
                 # Search within the flow's hostname
                 try:
-                    if re.search(current_hostname, f.request.host, flags=re.IGNORECASE):
-                        # Add to list
-                        connect_index.append(flow_index)
+                    if current_hostname:
+                        if re.search(current_hostname, f.request.host, flags=re.IGNORECASE):
+                            # Add to list
+                            connect_index.append(flow_index)
                 except Exception:
-                    pass
+                    logging.error("error connect-the-dots flow's hostname: " + f.request.pretty_url)
                 
                 # Search within the flow's response headers
                 try:
-                    if f.response is not None and f.response.headers:            
-                        location = f.response.headers.get("location")
-                        if re.search(current_hostname, location, flags=re.IGNORECASE):
-                            # Assign new hostname to look for
-                            current_hostname = f.request.host
-                            # Add to list
-                            connect_index.append(flow_index)
-                            
+                    if f.response:
+                        if "location" in f.response.headers:           
+                            location = f.response.headers.get("location")
+                            if re.search(current_hostname, location, flags=re.IGNORECASE):
+                                # Assign new hostname to look for
+                                current_hostname = f.request.host
+                                # Add to list
+                                connect_index.append(flow_index)                       
                 except Exception:
-                    pass
+                    logging.error("error connect-the-dots response headers: " + f.request.pretty_url)
                 # Search within the flow's response body
                 try:
-                    if f.response and f.response.content and "Content-Type" in f.response.headers and \
-                     ("text" in f.response.headers["Content-Type"] or "javascript" in f.response.headers["Content-Type"]):
-                        if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
-                            # Assign new hostname to look for
-                            current_hostname = f.request.host
-                            # Add to list
-                            connect_index.append(flow_index)
+                    if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                        if f.response:
+                            if f.response.content:
+                                if "Content-Type" in f.response.headers:
+                                    if "text" in f.response.headers["Content-Type"] or \
+                                       "javascript" in f.response.headers["Content-Type"] or \
+                                       "json" in f.response.headers["Content-Type"]:
+                                        if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
+                                            # Assign new hostname to look for
+                                            current_hostname = f.request.host
+                                            # Add to list
+                                            connect_index.append(flow_index)
                 except Exception:
-                    pass
+                    logging.error("error connect-the-dots response body: " + f.request.pretty_url)
                     
         # Loop through flows again to assign numbers
         number = 1
@@ -604,5 +667,13 @@ class Fiddleitm:
                     number +=1 
         ctx.master.addons.trigger(hooks.UpdateHook(flows))
         print("Done!")
+        
+    """ This command clears comments for all flows"""
+    @command.command("fiddleitm.clear")
+    def clear(self, flows: Sequence[flow.Flow]) -> None:
+        for f in flows:
+            if isinstance(f, http.HTTPFlow):
+                f.comment = ''
+        ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
         
 addons = [Fiddleitm()]
