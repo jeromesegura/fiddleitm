@@ -1,5 +1,9 @@
 # Release History
 
+## August 5 2024: fiddleitm 0.2.1
+
+- Fixed a bug that would occur if you ran mitmdump using the new index column ids
+
 ## July 29 2024: fiddleitm 0.2
 
 - Index column # [#7039](https://github.com/mitmproxy/mitmproxy/pull/7039) to visualize flow sequences is now available (requires mitmproxy 10.4.0)
