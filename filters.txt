@@ -1,0 +1,4 @@
+optimizationguide-pa.googleapis.com
+msedge.b.tlu.dl.delivery.mp.microsoft.com
+edge.microsoft.com
+
