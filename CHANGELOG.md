@@ -1,5 +1,9 @@
 # Release History
 
+## August 9 2024: fiddleitm 0.2.3
+
+- Fixed a bug with connect-the-dots
+
 ## August 9 2024: fiddleitm 0.2.2
 
 - Added new command to clear all comments from mitmweb UI (fiddleitm.clear @all)
