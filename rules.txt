@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-08-10
+# Last updated: 2024-08-12
 
 # Social engineering (malware)
 rule_name = "SocGholish (custom script injection)"; response_body = /[a-zA-Z]"\sid="[a-z-_]+custom[-_]script-js">/
@@ -51,4 +51,4 @@ rule_name = "Obfuscation"; response_body = "base64,ZnVuY3Rpb24gXzB4"
 
 # Misc
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
-rule_name = "Click tracker"; full_url = /onelink\.me|kochava\.com|gotrackier\.com|monitor\.clickcease\.com/; emoji_name = ":computer_mouse:"
+rule_name = "Click tracker"; full_url = /onelink\.me|kochava\.com|gotrackier\.com|monitor\.clickcease\.com|app\.adjust\.com/; emoji_name = ":computer_mouse:"
