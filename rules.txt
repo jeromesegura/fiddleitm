@@ -3,7 +3,6 @@
 # Last updated: 2024-08-13
 
 # Social engineering (malware)
-rule_name = "SocGholish (custom script injection)"; response_body = /[a-zA-Z]"\sid="[a-z-_]+custom[-_]script-js">/
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
 rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
 rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
