@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-08-13
+# Last updated: 2024-08-14
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -25,7 +25,7 @@ rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckF
 rule_name = "SuperCool Fake Updates (hacked site)"; response_body = "/win/jj.js\"></script>"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"; emoji_name = ":fish:"
-rule_name = "Fake Authenticator"; response_body ="yourFileName.zip"; response_body = "downloadButton1"
+rule_name = "Fake Authenticator"; response_body = "yourFileName.zip"; response_body = "downloadButton1"
 rule_name = "fakechromebookupdate"; response_body = "i.ibb.co"; response_body = "Your ${browserName}"
 
 # Social engineering (scams)
