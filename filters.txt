@@ -8,3 +8,4 @@ slscr.update.microsoft.com
 edgedl.me.gvt1.com
 update.googleapis.com
 fe3cr.delivery.mp.microsoft.com
+fe2cr.update.microsoft.co
