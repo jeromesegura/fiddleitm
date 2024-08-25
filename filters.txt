@@ -4,6 +4,7 @@ edge.microsoft.com
 incoming.telemetry.mozilla.org
 r10.o.lencr.org
 watson.telemetry.microsoft.com
+watson.events.data.microsoft.com
 slscr.update.microsoft.com
 edgedl.me.gvt1.com
 update.googleapis.com
