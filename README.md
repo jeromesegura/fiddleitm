@@ -1,4 +1,4 @@
-# fiddleitm v.0.2.3
+# fiddleitm v.0.2.4
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -126,6 +126,10 @@ This command helps you retrace each step that lead to a particular flow (require
 This command clears all comments from flow:
 
 ```fiddleitm.clear @all```
+
+## Filters (ignore hostnames)
+
+If you would like to reduce noise coming from certain hostnames, create a text file called ```hostname_filter.txt``` in the same directory as the script and add as many hostnames as you'd like (one per line).
 
 ## Anti-VM detection and evasion
 
