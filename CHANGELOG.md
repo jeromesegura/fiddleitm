@@ -1,5 +1,11 @@
 # Release History
 
+## August 26 2024: fiddleitm 0.2.4
+
+- Changed web columns order
+- Added a local filter option
+- Migrated to @jeromesegura
+
 ## August 9 2024: fiddleitm 0.2.3
 
 - Fixed a bug with connect-the-dots
