@@ -2,7 +2,7 @@
 This is an addon for mitmproxy that inspects flows and
 identifies malicious web traffic.
 
-GitHub: https://github.com/malwareinfosec/fiddleitm
+GitHub: https://github.com/jeromesegura/fiddleitm
 
 Usage:
     mitmproxy -s fiddleitm.py
@@ -57,6 +57,7 @@ import pyperclip
 from collections.abc import Sequence
 import tempfile
 import shutil
+import sys
 import mitmproxy
 
 from mitmproxy import http
@@ -71,13 +72,12 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.3"
+        version_local = "0.2.4"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
         # Initialize variables
         self.rules = []
-        self.filters = []
         self.anti_vm_list = [
             "VMware", "vmtoolsd", "VMwareService", "Vmwaretray", "vm3dservice",
             "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService",
@@ -92,12 +92,19 @@ class Fiddleitm:
             self.check_fiddleitm_update(version_local)
             # Call load main rules function
             self.load_main_rules()
-            # Call filters function
-            self.load_filters()
         else:
             logging.info('Offline mode')       
         # Call load local rules function
         self.load_local_rules()
+        # Check if we need to load the hostname filter
+        fiters_path = os.path.join(os.path.dirname(__file__), 'hostname_filter.txt')
+        if os.path.isfile(fiters_path):
+            self.filters = []
+            with open(fiters_path, 'r') as file:
+                for line in file:
+                    self.filters.append(line.strip())
+            ctx.options.ignore_hosts = self.filters
+            logging.info(" -> " + "Hostname filter loaded successfully")
 
     """ These are the command-line arguments"""
     def load(self, loader):
@@ -128,7 +135,7 @@ class Fiddleitm:
         loader.add_option(
             name = "web_columns",
             typespec=typing.Sequence[str],
-            default=['index', 'icon', 'path', 'method', 'status', 'size', 'comment', 'time'],
+            default=['index', 'icon', 'method', 'status', 'path', 'size', 'comment'],
             help="use custom columns",
         )
         
@@ -155,7 +162,7 @@ class Fiddleitm:
     def check_fiddleitm_update(self, version_local):
         session = requests.Session()
         session.trust_env = False
-        read_version = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py'
+        read_version = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/fiddleitm.py'
         response = session.get(read_version)
         if response.status_code:
             try:
@@ -170,7 +177,7 @@ class Fiddleitm:
                     answer = input('Would you like to install it now? (y/n)\n') 
                     if answer == "y":
                         print(f"Installing v." + version_online + "...")
-                        url = "https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/fiddleitm.py"
+                        url = "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/fiddleitm.py"
                         filename = "fiddleitm.py"
                         try:
                             # Download to a temporary file
@@ -197,7 +204,7 @@ class Fiddleitm:
         logging.info("Loading main rules...")
         session = requests.Session()
         session.trust_env = False
-        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt'
+        self.rules_url = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt'
         response = session.get(self.rules_url)
         if response.status_code:
             rules = response.text.split('\r\n')
@@ -206,31 +213,6 @@ class Fiddleitm:
             # Count number of rules
             rules_counter = self.add_rules_list(rules)
             logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
-            
-    """ Filters stored in the GitHub repository """
-    def load_filters(self):
-        logging.info("Loading filters...")
-        session = requests.Session()
-        session.trust_env = False
-        self.rules_url = 'https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/filters.txt'
-        response = session.get(self.rules_url)
-        if response.status_code:
-            filters = response.text.split('\r\n')
-            # Count number of filters
-            filters_counter = self.add_filters_list(filters)
-            logging.info(" -> " + str(filters_counter) + " filters loaded successfully")
-
-    """ Function to check for filters """
-    def check_filters(self, flow):
-        # Check filters
-        if flow.request.pretty_url == "https://github.com/malwareinfosec/fiddleitm/blob/main/rules.txt" or \
-           flow.request.pretty_url == "https://raw.githubusercontent.com/malwareinfosec/fiddleitm/main/rules.txt":
-            return True
-        for filter in self.filters:
-            if filter == flow.request.host:
-                return True
-                break
-        return False
     
     """ Local rules are your own, stored locally, on the same path as this script """
     def load_local_rules(self):
@@ -258,16 +240,6 @@ class Fiddleitm:
                 self.rules.append(rule)
                 rules_counter += 1
         return rules_counter
-        
-    """ Add filters """
-    def add_filters_list(self, filters):
-        filters_counter = 0
-        for filter in filters:
-            filter = filter.rstrip('\n')
-            # Add filters
-            self.filters.append(filter)
-            filters_counter += 1
-        return filters_counter
 
     """ Convert epoch time to friendly format """
     def convert_epoch(self,epoch_time):
@@ -401,7 +373,8 @@ class Fiddleitm:
     def check_response_body_string(self, flow, rule_name, response_body_string):
         # Only check if response exists and matches content-type
         try:
-            if "malwareinfosec/fiddleitm/" not in flow.request.pretty_url:
+            if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
+               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
                 if flow.response:
                     if flow.response.content:
                         if "Content-Type" in flow.response.headers:
@@ -412,14 +385,16 @@ class Fiddleitm:
                                     return True
                                 else:
                                     return False
-        except Exception:
-            logging.error("error while decoding content (string) " + flow.request.pretty_url)
+        except Exception as e:
+            if 'encoding' not in str(e):
+                logging.error("error while checking response content (string) for flow: " + str(master.view.index(flow)))
 
     """ Check for response body condition (regex) """
     def check_response_body_regex(self, flow, rule_name, response_body_regex):
         # Only check if response exists and matches content-type
         try:
-            if "malwareinfosec/fiddleitm/" not in flow.request.pretty_url:
+            if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
+               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
                 if flow.response:
                     if flow.response.content:
                         if "Content-Type" in flow.response.headers:
@@ -430,8 +405,9 @@ class Fiddleitm:
                                     return True
                                 else:
                                     return False
-        except Exception:
-            logging.error("error while decoding content (regex) " + flow.request.pretty_url)
+        except Exception as e:
+            if 'encoding' not in str(e):
+                logging.error("error while checking response content (regex) for flow: " + str(master.view.index(flow)))
 
     """ Check for full URL condition (string) """
     def check_full_url_string(self, flow, rule_name, full_url_string):
@@ -495,28 +471,24 @@ class Fiddleitm:
 
     """ flow request """
     def request(self, flow: http.HTTPFlow) -> None:
-        # Check filters
-        if not self.check_filters(flow):
-            # Override user-agent if needed
-            if ctx.options.custom_user_agent:
-                flow.request.headers["user-agent"] = ctx.options.custom_user_agent
-            # Override referer if needed
-            if ctx.options.custom_referer:
-                flow.request.headers["Referer"] = ctx.options.custom_referer
-            # Override accept-language if needed
-            if ctx.options.custom_accept_language:
-                flow.request.headers["accept-language"] = ctx.options.custom_accept_language
-            # Do anti-vm
-            if self.do_anti_vm:
-                flow.request.text = self.anti_vm(flow)
-                # Setting setting to false
-                self.do_anti_vm = False
+        # Override user-agent if needed
+        if ctx.options.custom_user_agent:
+            flow.request.headers["user-agent"] = ctx.options.custom_user_agent
+        # Override referer if needed
+        if ctx.options.custom_referer:
+            flow.request.headers["Referer"] = ctx.options.custom_referer
+        # Override accept-language if needed
+        if ctx.options.custom_accept_language:
+            flow.request.headers["accept-language"] = ctx.options.custom_accept_language
+        # Do anti-vm
+        if self.do_anti_vm:
+            flow.request.text = self.anti_vm(flow)
+            # Setting setting to false
+            self.do_anti_vm = False
 
     """ flow response """
     def response(self, flow: http.HTTPFlow) -> None:
-        # Check filters
-        if not self.check_filters(flow):
-            self.check_rules(flow)
+        self.check_rules(flow)
 
     """ Begin commands """
     """ For mitmweb, go to Options and select Display Command Bar.
@@ -549,9 +521,7 @@ class Fiddleitm:
         self.load_local_rules()
         for f in flows:
             if isinstance(f, http.HTTPFlow):
-                # Check filters
-                if not self.check_filters(f):
-                    self.check_rules(f)
+                self.check_rules(f)
         ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
     
     """ This command updates both main and local rules """
@@ -584,7 +554,8 @@ class Fiddleitm:
                         
                 # Search within the flow's response body
                 try:
-                    if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                    if f.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
+                       f.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
                         if f.response:
                             if f.response.content:
                                 if "Content-Type" in f.response.headers:
@@ -630,7 +601,7 @@ class Fiddleitm:
                     # Search within the flow's response headers
                     try:
                         if f.response:
-                            if "location" in f.response.headers:           
+                            if "location" in f.response.headers:
                                 location = f.response.headers.get("location")
                                 if re.search(current_hostname, location, flags=re.IGNORECASE):
                                     # Assign new hostname to look for
@@ -641,7 +612,8 @@ class Fiddleitm:
                         logging.error("error connect-the-dots response headers: " + f.request.pretty_url)
                     # Search within the flow's response body
                     try:
-                        if "malwareinfosec/fiddleitm/" not in f.request.pretty_url:
+                        if f.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
+                           f.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
                             if f.response:
                                 if f.response.content:
                                     if "Content-Type" in f.response.headers:
