@@ -10,3 +10,4 @@ edgedl.me.gvt1.com
 update.googleapis.com
 fe3cr.delivery.mp.microsoft.com
 fe2cr.update.microsoft.com
+config.edge.skype.com
