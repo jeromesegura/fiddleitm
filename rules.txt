@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-08-16
+# Last updated: 2024-08-30
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -45,6 +45,7 @@ rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body
 rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 rule_name = "img skimmer"; response_body = "fkhfnrxw"; response_body = "rqhsdjh"; emoji_name = ":credit_card:"
 rule_name = "Skimmer Hex"; response_body = "\x5B\x63\x63\x5F\x6E\x75\x6D\x62\x65\x72\x5D"; emoji_name = ":credit_card:"
+rule_name = "wrapperz skimmer"; response_body = "csc-cc-entry"; response_body = "wrapperz"
 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
