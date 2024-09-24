@@ -1,11 +1,11 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-09-20
+# Last updated: 2024-09-24
 
 # Social engineering (malware)
-rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
+rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
 rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
-rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
+rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)==\'.iso\'"; emoji_name = ":file_folder:"
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
 rule_name = "Parrot TDS"; response_body = /if\(typeof (nds[jw]|zqx[qw])==="undefined"\)/
 rule_name = "SmartApeSG (injection)"; full_url = /\/cdn[^\/]*\/original.js/; response_body = "userAgentData"
@@ -38,10 +38,10 @@ rule_name = "Tech Scam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
 
 # Web skimming
 rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
-rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF8St'+'ring'"; emoji_name = ":credit_card:"
+rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "\'readUTF8St\'+\'ring\'"; emoji_name = ":credit_card:"
 rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
 rule_name = "Gootag skimmer"; response_body = "appendChild(a)}))})"; response_body = /window,"\w{64}"/; emoji_name = ":credit_card:"
-rule_name = "Gootag skimmer"; response_body = "bi'+'ll'+'in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
+rule_name = "Gootag skimmer"; response_body = "bi\'+\'ll\'+\'in\'+\'g_"; response_body = "\'exp\':o,\'cvc\'"; emoji_name = ":credit_card:"
 #rule_name = "Atob URL skimmer"; response_body = "atob"; response_body = "aHR0cHM"; response_body = "checkout"; emoji_name = ":credit_card:"
 rule_name = "Atob checkout skimmer"; response_body= "\'atob\'"; response_body = "if(!/checkout|admin/i"; emoji_name = ":credit_card:"
 rule_name = "img skimmer"; response_body = "fkhfnrxw"; response_body = "rqhsdjh"; emoji_name = ":credit_card:"
