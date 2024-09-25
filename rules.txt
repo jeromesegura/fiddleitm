@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-09-24
+# Last updated: 2024-09-25
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
@@ -35,6 +35,7 @@ rule_name = "Tech scam redirect"; response_body = "bcda=1-"; response_body = "bc
 rule_name = "Tech scam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
 rule_name = "Tech Scam2"; response_body = "W0in0sNw0Shu1Er887"
 rule_name = "Tech Scam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
+rule_name = "Tech Scam4"; full_url = /web\.core\.windows\.net\/(Ma|Wi)0[a-z]0HelpErr0ShA52\//; emoji_name = ":phone:"
 
 # Credit card skimming
 rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
@@ -49,6 +50,7 @@ rule_name = "Skimmer Hex"; response_body = "\x5B\x63\x63\x5F\x6E\x75\x6D\x62\x65
 rule_name = "wrapperz skimmer"; response_body = "csc-cc-entry"; response_body = "wrapperz"
 rule_name = "icu skimmer"; response_body = /localStorage\[U\w\(/; response_body = "atob"; emoji_name = ":credit_card:"
 rule_name = "CosmicSting skimmer"; response_body = "cardnumber-kao153"; response_body = "cvv"; emoji_name = ":credit_card:"
+rule_name = "skins skimmer"; response_body = "jQuery[\'ajax\']({\'url\'"; response_body = "](atob"; response_body = "encodeURIComponent,location"; emoji_name = ":credit_card:"
 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
