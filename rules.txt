@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-09-25
+# Last updated: 2024-10-01
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
@@ -36,6 +36,7 @@ rule_name = "Tech scam1"; full_url = "web.core.windows.net"; response_body = "**
 rule_name = "Tech Scam2"; response_body = "W0in0sNw0Shu1Er887"
 rule_name = "Tech Scam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
 rule_name = "Tech Scam4"; full_url = /web\.core\.windows\.net\/(Ma|Wi)0[a-z]0HelpErr0ShA52\//; emoji_name = ":phone:"
+rule_name = "Tech Scam4"; response_body = "stroka"; response_body = "var phone = getVariableFromURl"; emoji_name = ":phone:"
 
 # Credit card skimming
 rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
