@@ -58,6 +58,11 @@ rule_name = "Rockstar2FA (main)"; response_body = "generateRandomTitle()"; emoji
 rule_name = "Rockstar2FA (credstealer)"; full_url = /\/validate_captcha.php/; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (credstealer)"; response_body = "function processEmailFromUrl()"; response_body = "function verifyphonenmbrh()"; emoji_name = ":fish:"
 rule_name = "Mamba 2FA"; full_url = "/?c3Y9bzM2NV"; emoji_name = ":fish:"
+rule_name = "Tycoon (main)"; response_body = ' == "nomatch"'; response_body = /document.write\(decodeURIComponent\(escape\(atob\(/; response_body = ' !== "nomatch"'; emoji_name = ":fish:"
+rule_name = "Tycoon (Microsoft)"; response_body = /function\s(tryfindingele|selectmultipleaccountadfs)/; emoji_name = ":fish:"
+rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/; emoji_name = ":fish:"
+rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"; emoji_name = ":fish:"
+rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"; emoji_name = ":fish:"
 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
