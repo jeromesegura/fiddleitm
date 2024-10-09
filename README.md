@@ -1,4 +1,4 @@
-# fiddleitm v.0.2.4
+# fiddleitm v.0.2.5
 
 This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
 
@@ -53,6 +53,10 @@ You can add your own rules to a file called ``localrules.txt`` placed in the sam
 
 ``rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...``
 
+or
+ 
+ ``rule_name = 'rule name'; condition 1 = 'string' ; condition 2 = /regex/; condition n = ...``
+
 **List of conditions:**
 
 * ``host_name``
@@ -103,7 +107,7 @@ This command allows you to print the flow URLs that matched your rules. See abov
 
 ## Run rules manually
 
-This command executes rules (both ```rules.txt``` and ```localrules.txt```) on the selected traffic. This is useful if you are testing a new rule in your ```localrules.txt```.
+This command updates and executes rules (both ```rules.txt``` and ```localrules.txt```) on the selected traffic. This is useful if you are testing a new rule in your ```localrules.txt```.
 
 ```fiddleitm.runrules @all```
 
