@@ -1,5 +1,10 @@
 # Release History
 
+## October 9 2024: fiddleitm 0.2.5
+
+- Added support for both single and double quotes when writing rules
+- Improved the clear command
+
 ## August 26 2024: fiddleitm 0.2.4
 
 - Changed web columns order
