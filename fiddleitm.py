@@ -29,6 +29,8 @@ directory as fiddleitm.py
 Syntax for rules:
 
  rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...
+ or
+ rule_name = 'rule name'; condition 1 = 'string' ; condition 2 = /regex/; condition n = ...
 
  List of conditions:
   host_name
@@ -72,7 +74,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.4"
+        version_local = "0.2.5"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -272,7 +274,7 @@ class Fiddleitm:
             # Create list of elements for each rule
             elements_list = rule.split("; ")
             # get rule name
-            rule_name = elements_list[0].replace("rule_name = \"", "")[:-1]
+            rule_name = elements_list[0].replace("rule_name = \"", "").replace("rule_name = \'", "")[:-1]
             # remove rule name from elements_list
             elements_list.pop(0)
             # get emoji_name if it's there by finding its index in the list
@@ -281,7 +283,7 @@ class Fiddleitm:
                 # convert it to an integer
                 emoji_index = int(''.join(map(str, emoji_index_list)))
                 # get emoji_name value
-                emoji_name = elements_list[emoji_index].replace("emoji_name = \"", "")[:-1]
+                emoji_name = elements_list[emoji_index].replace("emoji_name = \"", "").replace("emoji_name = \'", "")[:-1]
                 # remove emoji name from elements_list
                 elements_list.pop(emoji_index)
             else:
@@ -289,8 +291,8 @@ class Fiddleitm:
             # loop through conditions
             matched_condition = False
             for condition in elements_list:
-                if "host_name = \"" in condition:
-                    host_name_string = condition.replace("host_name = \"", "")[:-1]
+                if "host_name = \"" in condition or "host_name = \'" in condition:
+                    host_name_string = condition.replace("host_name = \"", "").replace("host_name = \'", "")[:-1]
                     matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
                     if matched_condition == False:
                         break
@@ -299,8 +301,8 @@ class Fiddleitm:
                     matched_condition = self.check_hostname_regex(flow, rule_name, host_name_regex)
                     if matched_condition == False:
                         break
-                if "host_ip = \"" in condition:
-                    host_ip_string = condition.replace("host_ip = \"", "")[:-1]
+                if "host_ip = \"" in condition or "host_ip = \'" in condition:
+                    host_ip_string = condition.replace("host_ip = \"", "").condition.replace("host_ip = \'", "")[:-1]
                     matched_condition = self.check_host_ip_string(flow, rule_name, host_ip_string)
                     if matched_condition == False:
                         break
@@ -309,8 +311,8 @@ class Fiddleitm:
                     matched_condition = self.check_host_ip_regex(flow, rule_name, host_ip_regex)
                     if matched_condition == False:
                         break
-                if "response_body = \"" in condition:
-                    response_body_string = condition.replace("response_body = \"", "")[:-1].replace("\\\"", "\"").replace("\\'", "'").replace("\\\\", "\\")
+                if "response_body = \"" in condition or "response_body = \'" in condition:
+                    response_body_string = condition.replace("response_body = \"", "").replace("response_body = \'", "")[:-1]
                     matched_condition = self.check_response_body_string(flow, rule_name, response_body_string)
                     if matched_condition == False:
                         break
@@ -319,8 +321,8 @@ class Fiddleitm:
                     matched_condition = self.check_response_body_regex(flow, rule_name, response_body_regex)
                     if matched_condition == False:
                         break
-                if "full_url = \"" in condition:
-                    full_url_string = condition.replace("full_url = \"", "")[:-1]
+                if "full_url = \"" in condition or "full_url = \'" in condition:
+                    full_url_string = condition.replace("full_url = \"", "").replace("full_url = \'", "")[:-1]
                     matched_condition = self.check_full_url_string(flow, rule_name, full_url_string)
                     if matched_condition == False:
                         break
@@ -647,6 +649,7 @@ class Fiddleitm:
         for f in flows:
             if isinstance(f, http.HTTPFlow):
                 f.comment = ''
+                f.marked = ''
         ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
         
 addons = [Fiddleitm()]
