@@ -1,12 +1,10 @@
 # fiddleitm v.0.2.5
 
-This is an addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) that inspects flows and identifies malicious web traffic.
+This addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) is designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect malicious traffic and display it within mitmweb, mitmproxy's graphical interface.
+
+Rules are based on string and regex patterns found within a [flow](https://docs.mitmproxy.org/stable/api/mitmproxy/flow.html) (hostname, IP address, URI, HTML/JS and more). In addition to the built-in [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt), you can also add your own (see further down below for instructions).
 
 ![Interface](interface.png)
-
-If you'd like the flows to be highlighted (in addition to the comments and emojis), simply type ``~marked`` in the filter section:
-
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/5a97e452-db7b-4444-82eb-2fa486895521)
 
 **Usage:**
 
