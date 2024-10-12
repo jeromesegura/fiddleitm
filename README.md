@@ -8,17 +8,9 @@ Rules are based on string and regex patterns found within a [flow](https://docs.
 
 **Usage:**
 
-To launch the mitmproxy interactive proxy:
-
-`mitmproxy -s fiddleitm.py`
-
-To launch the web interface:
-
 `mitmweb -s fiddleitm.py`
 
-To launch the command-line version of mitmproxy (useful for capturing a lot of traffic):
-
-`mitmdump -s fiddleitm.py`
+Note: you can also run mitmproxy or mitmdump and have the rules applied to flows.
 
 Options:
 
