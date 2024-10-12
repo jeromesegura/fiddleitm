@@ -4,7 +4,7 @@ This addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) is design
 
 Rules are based on string and regex patterns found within a [flow](https://docs.mitmproxy.org/stable/api/mitmproxy/flow.html) (hostname, IP address, URI, HTML/JS and more). In addition to the built-in [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt), you can also add your own (see further down below for instructions).
 
-![image](https://github.com/user-attachments/assets/b410462a-3db7-4052-a7b2-d791cb1ff57e)
+![image](https://github.com/user-attachments/assets/bd88835a-19c7-4413-b029-a279ade576e2)
 
 **Usage:**
 
