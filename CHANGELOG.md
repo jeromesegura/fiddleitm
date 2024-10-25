@@ -1,5 +1,9 @@
 # Release History
 
+## October 25 2024: fiddleitm 0.2.6
+
+- Improved search feature (fiddleitm.search @all)
+
 ## October 9 2024: fiddleitm 0.2.5
 
 - Added support for both single and double quotes when writing rules
