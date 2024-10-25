@@ -74,7 +74,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.5"
+        version_local = "0.2.6"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -541,6 +541,7 @@ class Fiddleitm:
         flows: Sequence[flow.Flow],
         searchquery: str,
     ) -> None:
+        results = []
         for f in flows:
             if isinstance(f, http.HTTPFlow):
                 # Search within the flow's response headers
@@ -565,13 +566,18 @@ class Fiddleitm:
                                        "javascript" in f.response.headers["Content-Type"] or \
                                        "json" in f.response.headers["Content-Type"]:
                                         if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
-                                            print(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
                                             f.marked = ":purple_circle:"
                                             f.comment = "Found: " + searchquery
+                                            results.append(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
                 except Exception:
                     logging.error("error while searching response body")
-        print("Done searching")
-        ctx.master.addons.trigger(hooks.UpdateHook(flows))
+        if not results:
+            print("No result found")
+        else:
+            print("Search results:")
+            for result in results:
+                print(result)
+            ctx.master.addons.trigger(hooks.UpdateHook(flows))
         
     """ This command runs connect-the-dots"""
     @command.command("fiddleitm.connect")
