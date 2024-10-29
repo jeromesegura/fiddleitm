@@ -74,7 +74,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.6"
+        version_local = "0.2.7"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -478,7 +478,7 @@ class Fiddleitm:
             flow.request.headers["user-agent"] = ctx.options.custom_user_agent
         # Override referer if needed
         if ctx.options.custom_referer:
-            flow.request.headers["Referer"] = ctx.options.custom_referer
+            flow.request.headers["referer"] = ctx.options.custom_referer
         # Override accept-language if needed
         if ctx.options.custom_accept_language:
             flow.request.headers["accept-language"] = ctx.options.custom_accept_language
