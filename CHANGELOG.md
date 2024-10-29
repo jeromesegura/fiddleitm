@@ -1,5 +1,9 @@
 # Release History
 
+## October 29 2024: fiddleitm 0.2.7
+
+- Corrected typo ( flow.request.headers["Referer"] to flow.request.headers["referer"])
+
 ## October 25 2024: fiddleitm 0.2.6
 
 - Improved search feature (fiddleitm.search @all)
