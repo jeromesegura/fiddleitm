@@ -74,7 +74,7 @@ from mitmproxy.log import ALERT
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.7"
+        version_local = "0.2.8"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -376,7 +376,9 @@ class Fiddleitm:
         # Only check if response exists and matches content-type
         try:
             if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
+               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt" and \
+               "optimizationguide-pa.googleapis.com" not in flow.request.pretty_url and \
+               "edgedl.me.gvt1.com" not in flow.request.pretty_url:
                 if flow.response:
                     if flow.response.content:
                         if "Content-Type" in flow.response.headers:
@@ -396,7 +398,9 @@ class Fiddleitm:
         # Only check if response exists and matches content-type
         try:
             if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
+               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt" and \
+               "optimizationguide-pa.googleapis.com" not in flow.request.pretty_url and \
+               "edgedl.me.gvt1.com" not in flow.request.pretty_url:
                 if flow.response:
                     if flow.response.content:
                         if "Content-Type" in flow.response.headers:
