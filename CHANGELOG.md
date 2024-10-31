@@ -1,5 +1,9 @@
 # Release History
 
+## October 30 2024: fiddleitm 0.2.8
+
+- Added Chrome and Edge domains exclusion to prevent unicode errors when browsers update
+  
 ## October 29 2024: fiddleitm 0.2.7
 
 - Corrected typo ( flow.request.headers["Referer"] to flow.request.headers["referer"])
