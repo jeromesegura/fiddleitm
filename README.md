@@ -1,4 +1,4 @@
-# fiddleitm v.0.2.7
+# fiddleitm v.0.2.8
 
 This addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) is designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
 
