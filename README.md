@@ -1,6 +1,6 @@
 # fiddleitm v.0.2.8
 
-Fiddle in the Middle (fiddleitm) is addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) is designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
+Fiddle in the Middle (fiddleitm) is addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
 
 Rules are based on string and regex patterns found within a [flow](https://docs.mitmproxy.org/stable/api/mitmproxy/flow.html) (hostname, IP address, URI, HTML/JS and more). In addition to the built-in [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt), you can also add your own (see further down below for instructions).
 
