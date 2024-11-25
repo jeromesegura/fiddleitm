@@ -1,13 +1,12 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/malwareinfosec/fiddleitm
-# Last updated: 2024-10-29
+# Last updated: 2024-11-25
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
 rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
 rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)==\'.iso\'"; emoji_name = ":file_folder:"
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
-rule_name = "Parrot TDS"; response_body = /if\(typeof (nds[jw]|zqx[qw])==="undefined"\)/
 rule_name = "SmartApeSG (injection)"; full_url = /\/cdn[^\/]*\/original.js/; response_body = "userAgentData"
 rule_name = "SmartApeSG (fake update)"; full_url = "/cdn-vs/main.php"; response_body = "msSaveOrOpenBlob"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
@@ -29,6 +28,8 @@ rule_name = "Fake Authenticator"; response_body = "yourFileName.zip"; response_b
 rule_name = "fakechromebookupdate"; response_body = "i.ibb.co"; response_body = "Your ${browserName}"
 rule_name = "Unknown injection (Java)"; response_body = /getElementsByTagName\("head"\)\[0\],b="script",c=atob\(/
 rule_name = "SG middlewear"; response_body = /^;\(function/; response_body = /==?'\);$/; emoji_name = ":arrow_forward:"
+rule_name = "Parrot TDS"; response_body = "var zqxw,HttpClient,rand,token;"
+rule_name = "Parrot TDS (call)"; full_url = /\/init.js\?ver=[a-z0-9]{21,22}/
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
