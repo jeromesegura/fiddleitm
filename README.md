@@ -73,7 +73,7 @@ Since v.0.2, if a new version of fiddleitm is available, you will get prompted t
 
 The updater also displays the latest version of mitmproxy.
 
-## Search within the body content of each flow
+## Search flows
 
 This feature is not currently supported in mitmweb, but fiddleitm provides a way to search using a regex via a command. You first need to enable the command line in the UI, by going to Options -> Display Command Bar.
 
@@ -88,6 +88,10 @@ You can replace @all by @shown @focus @marked @unmarked @hidden
 The search results will be printed in the CLI as well as marked in the UI:
 
 ![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/293d6fc1-afe3-4727-aaef-26657fc17892)
+
+You can also search for a response body SHA256
+
+```fiddleitm.search @all SHA256```
 
 ## Print (copy to clipboard) flow URLs that have been detected by a rule
 
