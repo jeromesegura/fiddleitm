@@ -37,6 +37,7 @@ Syntax for rules:
   host_ip
   full_url
   response_body
+  response_body_sha256
 
  Optional:
   emoji_name
@@ -71,10 +72,11 @@ from mitmproxy import hooks
 from mitmproxy.addonmanager import Loader
 from mitmproxy.ctx import master
 from mitmproxy.log import ALERT
+from hashlib import sha256
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.8"
+        version_local = "0.2.9"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -331,6 +333,11 @@ class Fiddleitm:
                     matched_condition = self.check_full_url_regex(flow, rule_name, full_url_regex)
                     if matched_condition == False:
                         break
+                if "response_body_sha256 = \"" in condition or "response_body_sha256 = \'" in condition:
+                    response_body_sha256 = condition.replace("response_body_sha256 = \"", "").replace("response_body_sha256 = \'", "")[:-1]
+                    matched_condition = self.check_response_body_sha256(flow, rule_name, response_body_sha256)
+                    if matched_condition == False:
+                        break
 
             # check if we have a match for all conditions
             if matched_condition:
@@ -414,6 +421,22 @@ class Fiddleitm:
         except Exception as e:
             if 'encoding' not in str(e):
                 logging.error("error while checking response content (regex) for flow: " + str(master.view.index(flow)))
+                
+    """ Check for response body sha256 condition (string) """
+    def check_response_body_sha256(self, flow, rule_name, response_body_sha256):
+        # Only check if response exists
+        try:
+            if flow.response:
+                if flow.response.content:
+                    response_body_hash = sha256(flow.response.raw_content).hexdigest()
+                    if response_body_sha256 == response_body_hash:
+                        return True
+                    else:
+                        return False
+        except Exception as e:
+            if 'encoding' not in str(e):
+                logging.error("error while checking response body sha256 for flow: " + str(master.view.index(flow)))            
+    
 
     """ Check for full URL condition (string) """
     def check_full_url_string(self, flow, rule_name, full_url_string):
@@ -538,7 +561,7 @@ class Fiddleitm:
         self.load_main_rules()
         self.load_local_rules()
     
-    """ This command searches through flows using a regex expression """
+    """ This command searches through flows using a regex or SHA256 """
     @command.command("fiddleitm.search")
     def search(
         self,
@@ -569,12 +592,26 @@ class Fiddleitm:
                                     if "text" in f.response.headers["Content-Type"] or \
                                        "javascript" in f.response.headers["Content-Type"] or \
                                        "json" in f.response.headers["Content-Type"]:
+                                        print(response_body_hash)
                                         if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
                                             f.marked = ":purple_circle:"
                                             f.comment = "Found: " + searchquery
                                             results.append(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
                 except Exception:
                     logging.error("error while searching response body")
+                    
+                # Search for SHA256
+                try:
+                    if f.response:
+                        if f.response.content:
+                            response_body_hash = sha256(f.response.raw_content).hexdigest()
+                            if searchquery == response_body_hash:
+                                f.marked = ":purple_circle:"
+                                f.comment = "Found: " + searchquery
+                                results.append(f"{searchquery} found in response body SHA256 for flow #{master.view.index(f)+1}")
+                except Exception:
+                    logging.error("error while searching for SHA256")
+                
         if not results:
             print("No result found")
         else:
