@@ -1,4 +1,4 @@
-# fiddleitm v.0.2.8
+# fiddleitm v.0.2.9
 
 "Fiddle in the Middle" (fiddleitm) is addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
 
@@ -34,6 +34,7 @@ Currently, **fiddleitm** inspects the following:
 * remote host IP address
 * remote host full URL
 * response body
+* response body SHA256
 
 Predefined [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
 
@@ -56,6 +57,8 @@ or
 * ``full_url``
 
 * ``response_body``
+
+* ``response_body_sha256``
 
 **Optional:**
 * ``emoji_name``
