@@ -55,6 +55,7 @@ rule_name = "CosmicSting skimmer"; response_body = "cardnumber-kao153"; response
 rule_name = "skins skimmer"; response_body = "jQuery[\'ajax\']({\'url\'"; response_body = "](atob"; response_body = "encodeURIComponent,location"; emoji_name = ":credit_card:"
 rule_name = "fiza skimmer"; response_body = "fiza="; response_body = "cvv\x22"; emoji_name = ":credit_card:"
 rule_name = "atob skimmer"; response_body = "{'url':atob('aHR0cHM6L"; response_body = "cc_number"; emoji_name = ":credit_card:"
+rule_name = "imageDirectory skimmer"; response_body = "imageDirectory=btoa(btoa"; emoji_name = ":credit_card:"
 
 # Phishing
 rule_name = "XXX phishing kit"; response_body = "url: \"xxx.php\""; response_body = "function getUpdatesLogin()"; emoji_name = ":fish:"
