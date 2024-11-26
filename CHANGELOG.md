@@ -1,5 +1,9 @@
 # Release History
 
+## November 26 2024: fiddleitm 0.2.9
+
+- Added support for response body SHA256 rules
+
 ## October 30 2024: fiddleitm 0.2.8
 
 - Added Chrome and Edge domains exclusion to prevent unicode errors when browsers update
