@@ -1,5 +1,9 @@
 # Release History
 
+## December 9 2024: fiddleitm 0.3
+
+- Fixed a bug with fiddleitm.search
+
 ## November 26 2024: fiddleitm 0.2.9
 
 - Added support for response body SHA256 rules
