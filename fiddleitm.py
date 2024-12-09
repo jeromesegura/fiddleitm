@@ -76,7 +76,7 @@ from hashlib import sha256
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.2.9"
+        version_local = "0.3"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -592,7 +592,6 @@ class Fiddleitm:
                                     if "text" in f.response.headers["Content-Type"] or \
                                        "javascript" in f.response.headers["Content-Type"] or \
                                        "json" in f.response.headers["Content-Type"]:
-                                        print(response_body_hash)
                                         if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
                                             f.marked = ":purple_circle:"
                                             f.comment = "Found: " + searchquery
