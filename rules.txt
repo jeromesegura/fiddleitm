@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-01-13
+# Last updated: 2025-01-15
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
@@ -69,6 +69,8 @@ rule_name = "Tycoon (Microsoft)"; response_body = /function\s(tryfindingele|sele
 rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/; emoji_name = ":fish:"
 rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"; emoji_name = ":fish:"
 rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"; emoji_name = ":fish:"
+rule_name = "FlowerStorm"; full_url = "/next.php"; response_body = '{"status":false}'; emoji_name = ":fish:"
+rule_name = "FlowerStorm"; full_url = "/bootstrap.min.js"; response_body = "function submitPass()"; response_body = "verifyOtpCode"; emoji_name = ":fish:"
 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
