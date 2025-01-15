@@ -1,5 +1,10 @@
 # Release History
 
+## January 15 2024: fiddleitm 0.4
+
+- improved local logging
+- added option to drop traffic with media files
+
 ## December 9 2024: fiddleitm 0.3
 
 - Fixed a bug with fiddleitm.search
