@@ -76,7 +76,7 @@ from hashlib import sha256
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.3"
+        version_local = "0.4"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -117,6 +117,12 @@ class Fiddleitm:
             typespec=bool,
             default=False,
             help="log events from rules that match",
+        )
+        loader.add_option(
+            name="traffic_lite",
+            typespec=bool,
+            default=False,
+            help="drop images, videos and other large content",
         )
         loader.add_option(
             name="custom_user_agent",
@@ -247,11 +253,12 @@ class Fiddleitm:
 
     """ Convert epoch time to friendly format """
     def convert_epoch(self,epoch_time):
-        seconds = int(epoch_time)
-        milliseconds = int((epoch_time - seconds) * 1000)  # convert to milliseconds
-        temp_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(seconds))  # format in UTC
-        formatted_timestamp = f"{temp_timestamp}.{milliseconds:03d}"
-        return formatted_timestamp
+        try:
+            local_time = time.localtime(epoch_time)  # Use time.localtime for local time
+            formatted_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+            return formatted_timestamp
+        except (TypeError, ValueError, OSError, OverflowError):
+            return "Invalid epoch time"
 
 
     """ Anti-vm replaces certain keywords used for VM detection """
@@ -470,16 +477,23 @@ class Fiddleitm:
         # Log events to file
         if ctx.options.log_events:
             # Assign default values
-            epochtime, comment, referer, ipaddress, servername = (value for value in ["", "", "", "", ""])
+            epochtime, friendlytime, comment, referer, ipaddress, servername, hostname = (value for value in ["", "",  "", "", "", "", ""])
             if flow.timestamp_created is not None:
                 epochtime = str(int(flow.timestamp_created))
+                friendlytime = self.convert_epoch(int(flow.timestamp_created))
                 if epochtime is None:
                     epochtime = "N/A"
+                    friendlytime = "N/A"
                 
             if flow.server_conn.peername is not None:
                 ipaddress = flow.server_conn.peername[0]
                 if ipaddress is None:
                     ipaddress = "N/A"
+           
+            if flow.request.host is not None:
+                hostname = flow.request.host
+                if hostname is None:
+                    hostname = "N/A"
                 
             if flow.response is not None and flow.response.headers:            
                 servername = flow.response.headers.get("server")
@@ -491,7 +505,7 @@ class Fiddleitm:
                         referer = "N/A"
             # Write to file
             with open("rules.log", 'a') as rules_log:
-                rules_log.write(epochtime + "," + ipaddress + "," + servername + "," + flow.request.pretty_url + "," + referer + "," + flow.comment + "\n")
+                rules_log.write(epochtime + "," + friendlytime + "," + ipaddress + "," + servername.replace(",", " ") + "," + hostname + "," + flow.request.pretty_url.replace(",", "_comma_") + "," + referer + "," + flow.comment + "\n")
         # Check if anti-vm was detected
         if "Fingerprinting" in flow.comment:
             self.do_anti_vm = True
@@ -514,6 +528,10 @@ class Fiddleitm:
             flow.request.text = self.anti_vm(flow)
             # Setting setting to false
             self.do_anti_vm = False
+        # Drop images, videos and other large content (if option is enabled)
+        if ctx.options.traffic_lite:
+            if any(ext in flow.request.pretty_url.lower() for ext in (".gif", ".jpg", ".jpeg", ".png", ".webp", ".wav", ".mp4")):
+                flow.kill()
 
     """ flow response """
     def response(self, flow: http.HTTPFlow) -> None:
