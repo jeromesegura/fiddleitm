@@ -1,4 +1,4 @@
-# fiddleitm v.0.3
+# fiddleitm v.0.4
 
 "Fiddle in the Middle" (fiddleitm) is addon for [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
 
@@ -21,6 +21,8 @@ Options:
 * overrride default accept-language: ``--set custom_accept_language=""``
 
 * log events for rules that match flows (writes to *rules.log*): ``--set log_events=true``
+
+* drop traffic containing image, sound and video files: ``--set traffic_lite=true``
 
 * add upstream proxy: ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
 
