@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-01-15
+# Last updated: 2025-01-16
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
@@ -71,6 +71,9 @@ rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"; emoji_nam
 rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"; emoji_name = ":fish:"
 rule_name = "FlowerStorm"; full_url = "/next.php"; response_body = '{"status":false}'; emoji_name = ":fish:"
 rule_name = "FlowerStorm"; full_url = "/bootstrap.min.js"; response_body = "function submitPass()"; response_body = "verifyOtpCode"; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/index/; response_body = 'var captchaChecked = false;'; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /cf-turnstile-response=/; response_body = 'var random ='; response_body = 'var autograb = false;'; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/verify/; response_body = 'URL=https://href.li/?https://en.wikipedia.org/'; response_body = 'Approve a request on my Microsoft Authenticator app'; emoji_name = ":fish:"
 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
