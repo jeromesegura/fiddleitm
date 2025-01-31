@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-01-16
+# Last updated: 2025-01-31
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,\'script\',\'https://"
@@ -10,8 +10,6 @@ rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; res
 rule_name = "SmartApeSG (injection)"; full_url = /\/cdn[^\/]*\/original.js/; response_body = "userAgentData"
 rule_name = "SmartApeSG (fake update)"; full_url = "/cdn-vs/main.php"; response_body = "msSaveOrOpenBlob"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
-rule_name = "doggygangers JS"; response_body = "var isLand"; response_body = /doggygangers\.com/
-rule_name = "doggygangers FakeBat"; full_url = /https:\/\/doggygangers\.com/
 rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
 rule_name = "ClearFake injection"; response_body = "base64,ZnVuY3Rpb24gXzB4"; response_body= "J2V0aF9jYWxs"
 rule_name = "ClearFake iframe"; response_body = "var payload = atob"; response_body = "function copyCode()"
@@ -78,6 +76,7 @@ rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/verify/; response_body = 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
 rule_name = "Obfuscation"; response_body = "base64,ZnVuY3Rpb24gXzB4"
+rule_name = "Google CAPTCHA"; response_body = "<form id=\"captcha-form\""; response_body = "<div id=\"recaptcha\""
 
 # Misc
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
