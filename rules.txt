@@ -19,7 +19,7 @@ rule_name = "Kongtuke JS"; response_body = "&refferer"; response_body = "/js.php
 rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
 rule_name = "ClickFix"; full_url = "node-api-1o7y.onrender.com"; emoji_name = ":fish:"
 rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O"; emoji_name = ":fish:"
-rule_name = "SuperCool Fake Updates (hacked site)"; response_body = "/win/jj.js\"></script>"; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates (hacked site)"; response_body = '/win/jj.js"></script>'; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"; emoji_name = ":fish:"
 rule_name = "Fake Authenticator"; response_body = "yourFileName.zip"; response_body = "downloadButton1"
@@ -57,7 +57,7 @@ rule_name = "imageDirectory skimmer"; response_body = "imageDirectory=btoa(btoa"
 rule_name = "MagicTrick skimmer"; response_body = "function performMagicTrick()"; response_body = "generateId"; emoji_name = ":credit_card:"
 
 # Phishing
-rule_name = "XXX phishing kit"; response_body = "url: \"xxx.php\""; response_body = "function getUpdatesLogin()"; emoji_name = ":fish:"
+rule_name = "XXX phishing kit"; response_body = 'url: "xxx.php"'; response_body = "function getUpdatesLogin()"; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (main)"; response_body = "generateRandomTitle()"; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (credstealer)"; full_url = /\/validate_captcha.php/; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (credstealer)"; response_body = "function processEmailFromUrl()"; response_body = "function verifyphonenmbrh()"; emoji_name = ":fish:"
@@ -76,7 +76,7 @@ rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/verify/; response_body = 
 # Fingerprinting/obfuscation
 rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
 rule_name = "Obfuscation"; response_body = "base64,ZnVuY3Rpb24gXzB4"
-rule_name = "Google CAPTCHA"; response_body = "<form id=\"captcha-form\""; response_body = "<div id=\"recaptcha\""
+rule_name = "Google CAPTCHA"; response_body = '<form id="captcha-form"'; response_body = '<div id="recaptcha"'
 
 # Misc
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
