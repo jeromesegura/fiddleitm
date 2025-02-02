@@ -76,7 +76,7 @@ from hashlib import sha256
 
 class Fiddleitm:
     def __init__(self):
-        version_local = "0.4"
+        version_local = "0.5"
         print('#################')
         print('fiddleitm v.' + version_local)
         print('#################')
@@ -120,6 +120,12 @@ class Fiddleitm:
         )
         loader.add_option(
             name="traffic_lite",
+            typespec=bool,
+            default=False,
+            help="drop images, videos and other large content",
+        )
+        loader.add_option(
+            name="googleads",
             typespec=bool,
             default=False,
             help="drop images, videos and other large content",
@@ -536,6 +542,32 @@ class Fiddleitm:
     """ flow response """
     def response(self, flow: http.HTTPFlow) -> None:
         self.check_rules(flow)
+        if ctx.options.googleads:
+            self.googleads(flow)
+        
+    def googleads(self, flow):
+        base_directory = "googleads" 
+        if not os.path.exists(base_directory):
+            os.makedirs(base_directory)
+        # Check for Google CAPTCHA
+        if flow.comment == "Google CAPTCHA":
+            with open(f'{base_directory}/CAPTCHA.log', "w", encoding="utf-8") as file:
+                file.write(flow.response.text)
+        # Check URL for search query
+        if "search?q=" in flow.request.pretty_url and "/complete/search?q=" not in flow.request.pretty_url:
+            # Check if the HTML contains the data-rw attribute (Google Ad URL)
+            googleadurl = re.search(r'data-rw="(.*?)"', flow.response.text, flags=re.IGNORECASE)
+            if googleadurl: 
+                epochtime = str(int(flow.timestamp_created))
+                match = re.search(r"[?&]q=([^&]+)", flow.request.pretty_url)
+                query = match.group(1)
+                output = f"{query}-{epochtime}.html"
+                output_path = os.path.join(base_directory, output)
+                with open(output_path, "w", encoding="utf-8") as file:
+                    print(f"Writing Google Ads to: {output_path}")
+                    file.write(flow.response.text)
+                    print(f"File written successfully to: {output_path}")
+        
 
     """ Begin commands """
     """ For mitmweb, go to Options and select Display Command Bar.
