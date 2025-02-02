@@ -1,5 +1,9 @@
 # Release History
 
+## February 1 2025: fiddleitm 0.5
+
+- added Google Ads and CAPTCHA detection
+
 ## January 15 2025: fiddleitm 0.4
 
 - improved local logging
