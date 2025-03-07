@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-03-04
+# Last updated: 2025-03-06
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -32,14 +32,16 @@ rule_name = "ClickFix typo"; response_body = "<title>Google Captcha Verifycation
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
-rule_name = "Tech scam redirect"; response_body = "bcda=1-"; response_body = "bcda=1-"; emoji_name = ":arrow_forward:"
-rule_name = "Tech scam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
-rule_name = "Tech Scam2"; response_body = "W0in0sNw0Shu1Er887"
-rule_name = "Tech Scam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
-rule_name = "Tech Scam4"; full_url = /web\.core\.windows\.net\/(Ma|Wi)0[a-z]0HelpErr0ShA52\//; emoji_name = ":phone:"
-rule_name = "Tech Scam5"; response_body = "stroka"; response_body = "var phone = getVariableFromURl"; emoji_name = ":phone:"
-rule_name = "Tech Scam6"; response_body = "var ph0ne"; response_body = "Your device has been blocked"; emoji_name = ":phone:"
-rule_name = "Tech Scam7"; full_url = "USAHTML/?bcda=1"; emoji_name = ":phone:"
+
+# Social engineering (tech support scams)
+rule_name = "TechScam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
+rule_name = "TechScam2"; response_body = "W0in0sNw0Shu1Er887"
+rule_name = "TechScam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
+rule_name = "TechScam4"; full_url = /web\.core\.windows\.net\/(Ma|Wi)0[a-z]0HelpErr0ShA52\//; emoji_name = ":phone:"
+rule_name = "TechScam5"; response_body = "stroka"; response_body = "var phone = getVariableFromURl"; emoji_name = ":phone:"
+rule_name = "TechScam6"; response_body = "var ph0ne"; response_body = "Your device has been blocked"; emoji_name = ":phone:"
+rule_name = "TechScam7"; full_url = "USAHTML/?bcda=1"; emoji_name = ":phone:"
+rule_name = "TechScam8"; response_body = "Allow</span>"; response_body = "Deny</span>"; response_body = "case 27:"; emoji_name = ":phone:"
 
 # Credit card skimming
 rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
@@ -83,4 +85,3 @@ rule_name = "Google CAPTCHA"; response_body = '<form id="captcha-form"'; respons
 
 # Misc
 rule_name = "Google Ad URL"; full_url = "https://www.googleadservices.com/pagead/aclk?"; emoji_name = ":newspaper:"
-rule_name = "Click tracker"; full_url = /onelink\.me|kochava\.com|gotrackier\.com|monitor\.clickcease\.com|app\.adjust\.com/; emoji_name = ":computer_mouse:"
