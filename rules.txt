@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-03-13
+# Last updated: 2025-04-02
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -29,6 +29,7 @@ rule_name = "SG middlewear"; response_body = /^;\(function/; response_body = /==
 rule_name = "Parrot TDS"; response_body = "var zqxw,HttpClient,rand,token;"
 rule_name = "Parrot TDS (call)"; full_url = /\/init.js\?ver=[a-z0-9]{21,22}/
 rule_name = "ClickFix typo"; response_body = "<title>Google Captcha Verifycation"; response_body = "=>(function()"
+rule_name = "ClickFix CF"; response_body = "<title>Checking if you are human</title>"; response_body = "step0Elements"; response_body = "navigator.clipboard.writeText"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
