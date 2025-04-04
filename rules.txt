@@ -73,8 +73,8 @@ rule_name = "Tycoon (Microsoft)"; response_body = /function\s(tryfindingele|sele
 rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/; emoji_name = ":fish:"
 rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"; emoji_name = ":fish:"
 rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"; emoji_name = ":fish:"
-rule_name = "Tycoon2FA (checker)"; full_url = /\/[a-z]+[@\$!][a-z0-9]+$/; response_body = /^0$/
-rule_name = "Tycoon2FA (checker)"; full_url = /\/[a-z]+[@\$!][a-z0-9]+$/; response_body = /^1$/
+rule_name = "Tycoon2FA (checker)"; full_url = /\/[a-z]+[@\$!][a-z0-9]+$/; response_body = /^(0|1)$/; emoji_name = ":fish:"
+rule_name = "Tycoon2FA (main)"; response_body = /{"[a-d]":"[^"]+","[a-d]":"[^"]+","[a-d]":"[^"]+","[a-d]":"[^"]+"}/; emoji_name = ":fish:"
 rule_name = "FlowerStorm"; full_url = "/next.php"; response_body = '{"status":false}'; emoji_name = ":fish:"
 rule_name = "FlowerStorm"; full_url = "/bootstrap.min.js"; response_body = "function submitPass()"; response_body = "verifyOtpCode"; emoji_name = ":fish:"
 rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/index/; response_body = 'var captchaChecked = false;'; emoji_name = ":fish:"
