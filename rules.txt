@@ -1,14 +1,13 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-04-14
+# Last updated: 2025-04-25
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
 rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
 rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
-rule_name = "SmartApeSG (injection)"; full_url = /\/cdn[^\/]*\/original.js/; response_body = "userAgentData"
-rule_name = "SmartApeSG (fake update)"; full_url = "/cdn-vs/main.php"; response_body = "msSaveOrOpenBlob"
+rule_name = "SmartApeSG"; response_body = "function generateRandomString"; response_body = "function checkLastVisit"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
 rule_name = "ClearFake injection"; response_body = "base64,ZnVuY3Rpb24gXzB4"; response_body= "J2V0aF9jYWxs"
