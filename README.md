@@ -142,3 +142,13 @@ fiddleitm intercepts such attempts and replaces certain keywords commonly used t
 
 ![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/3dab8c57-2c16-4485-ab37-f1a9acdb92aa)
 
+## Replaying traffic flows
+
+--server-replay
+
+    --server_replay_reuse
+    
+    --set server_replay_extra='kill'
+    
+    --set connection_strategy=lazy
+    
