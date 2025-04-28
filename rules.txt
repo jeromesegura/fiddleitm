@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-04-27
+# Last updated: 2025-04-28
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -65,7 +65,7 @@ rule_name = "5555 skimmer"; response_body = "url5555, true"; emoji_name = ":cred
 rule_name = "crm skimmer"; response_body = "crm-cvv"; response_body = "crmSend"; emoji_name = ":credit_card:"
 
 # Phishing
-rule_name = "XXX phishing kit"; response_body = 'url: "xxx.php"'; response_body = "console.log(username,password);"; emoji_name = ":fish:"
+rule_name = "XXX phishing kit"; response_body = 'url: "xxx.php"'; response_body = "if(username.length > 3 && password"; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (main)"; response_body = "generateRandomTitle()"; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (credstealer)"; full_url = /\/validate_captcha.php/; emoji_name = ":fish:"
 rule_name = "Rockstar2FA (credstealer)"; response_body = "function processEmailFromUrl()"; response_body = "function verifyphonenmbrh()"; emoji_name = ":fish:"
