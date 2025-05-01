@@ -1,12 +1,14 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-04-28
+# Last updated: 2025-04-30
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
 rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
 rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
 rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
+rule_name = "SmartApeSG (injection)"; response_body = "function generateRandomString"; response_body = "function checkLastVisit"
+rule_name = "SmartApeSG (ClickFix)"; response_body = "const nE="; response_body = "curl.exe"
 rule_name = "SmartApeSG"; response_body = "function generateRandomString"; response_body = "function checkLastVisit"
 rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
 rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
@@ -29,11 +31,14 @@ rule_name = "Parrot TDS"; response_body = "var zqxw,HttpClient,rand,token;"
 rule_name = "Parrot TDS (call)"; full_url = /\/init.js\?ver=[a-z0-9]{21,22}/
 rule_name = "ClickFix typo"; response_body = "<title>Google Captcha Verifycation"; response_body = "=>(function()"
 rule_name = "ClickFix CF"; response_body = "<title>Checking if you are human</title>"; response_body = "step0Elements"; response_body = "navigator.clipboard.writeText"
+rule_name = "CoreSecThree"; full_url = /\/api\/getFrameUrl/; response_body = '"url"'
+rule_name = "CoreSecThree"; full_url = /\/api\/getUrl/; response_body = '"url"'
+rule_name = "CoreSecThree (ClickFix)"; full_url = /\/wordpress\?domain=/; response_body = 'Verify you are human'
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
 
-# Social engineering (tech support scams)
+# Social engineering (tech support scams)https://docs.google.com/spreadsheets/d/1p9zjK1W8Iw3WqytEhPJ_eMKKslwUavLtPZ9XpmWTGGs/edit?gid=504217357#gid=504217357
 rule_name = "TechScam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
 rule_name = "TechScam2"; response_body = "W0in0sNw0Shu1Er887"
 rule_name = "TechScam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
