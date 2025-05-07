@@ -144,11 +144,5 @@ fiddleitm intercepts such attempts and replaces certain keywords commonly used t
 
 ## Replaying traffic flows
 
---server-replay
+````mitmweb -s .\fiddleitm.py --server-replay [saved_flows] --server-replay-reuse --set connection_strategy=lazy````
 
-    --server_replay_reuse
-    
-    --set server_replay_extra='kill'
-    
-    --set connection_strategy=lazy
-    
