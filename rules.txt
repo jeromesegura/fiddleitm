@@ -1,6 +1,6 @@
 # Rules for mitmproxy
 # To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
-# Last updated: 2025-05-01
+# Last updated: 2025-05-20
 
 # Social engineering (malware)
 rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
@@ -17,7 +17,6 @@ rule_name = "FIN7 phishing page"; response_body = "Requires Browser Extension"; 
 rule_name = "Binance"; full_url = /bsc-dataseed1\.binance\.org|bsc-dataseed3\.defibit\.io/
 rule_name = "Kongtuke JS"; response_body = "&refferer"; response_body = "/js.php?device="
 rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
-rule_name = "ClickFix"; full_url = "node-api-1o7y.onrender.com"; emoji_name = ":fish:"
 rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O"; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates (hacked site)"; response_body = '/win/jj.js"></script>'; emoji_name = ":fish:"
 rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
@@ -33,6 +32,7 @@ rule_name = "ClickFix CF"; response_body = "<title>Checking if you are human</ti
 rule_name = "CoreSecThree"; full_url = /\/api\/getFrameUrl/; response_body = '"url"'
 rule_name = "CoreSecThree"; full_url = /\/api\/getUrl/; response_body = '"url"'
 rule_name = "CoreSecThree (ClickFix)"; full_url = /\/wordpress\?domain=/; response_body = 'Verify you are human'
+rule_name = "ClickFix IRS"; response_body = "sendCaptchaData(itemId)"; response_body = "someEdit"
 
 # Social engineering (scams)
 rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
