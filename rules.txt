@@ -67,6 +67,7 @@ rule_name = "MagicTrick skimmer"; response_body = "function performMagicTrick()"
 rule_name = "GAO skimmer"; response_body = "i.atob(r)"; response_body = "+i.atob(o)"; emoji_name = ":credit_card:"
 rule_name = "5555 skimmer"; response_body = "url5555, true"; emoji_name = ":credit_card:"
 rule_name = "crm skimmer"; response_body = "crm-cvv"; response_body = "crmSend"; emoji_name = ":credit_card:"
+rule_name = "GTAG/CSS skimmer"; response_body = "link.links::before"; response_body = "atob("; emoji_name = ":credit_card:"
 
 # Phishing
 rule_name = "XXX phishing kit"; response_body = 'url: "xxx.php"'; response_body = "if(username.length > 3 && password"; emoji_name = ":fish:"
