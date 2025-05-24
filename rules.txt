@@ -1,0 +1,98 @@
+# Rules for mitmproxy
+# To report false positives, or contribute: https://github.com/jeromesegura/fiddleitm
+# Last updated: 2025-05-20
+
+# Social engineering (malware)
+rule_name = "SocGholish (ajax injection)"; full_url = "/admin-ajax-js"; response_body = "window,document,'script','https://"
+rule_name = "SocGholish (html)"; response_body = ";function sendStatistics(type)"; response_body = /class="browser-landing"/
+rule_name = "SocGholish JS"; response_body = "var filename="Update.js""; response_body = "filename.substr(-4)=='.iso'"; emoji_name = ":file_folder:"
+rule_name = "FakeDomen"; response_body = "domen"; response_body = "detecct"; response_body = "linkDesktop"
+rule_name = "SmartApeSG (injection)"; response_body = "function generateRandomString"; response_body = "function checkLastVisit"
+rule_name = "SmartApeSG (ClickFix)"; response_body = "const nE="; response_body = "curl.exe"
+rule_name = "Gootloader"; full_url = /\/\?a\w{6}=[0-9]{7}$/; response_body = "/*"
+rule_name = "FakeBat payload"; full_url = "/upload"; full_url = /UpdateSetup-x86.msix$/
+rule_name = "ClearFake injection"; response_body = "base64,ZnVuY3Rpb24gXzB4"; response_body= "J2V0aF9jYWxs"
+rule_name = "ClearFake iframe"; response_body = "var payload = atob"; response_body = "function copyCode()"
+rule_name = "FIN7 phishing page"; response_body = "Requires Browser Extension"; response_body = /special\s[bB]rowser\s[eE]xtension/; emoji_name = ":fish:"
+rule_name = "Binance"; full_url = /bsc-dataseed1\.binance\.org|bsc-dataseed3\.defibit\.io/
+rule_name = "Kongtuke JS"; response_body = "&refferer"; response_body = "/js.php?device="
+rule_name = "Kongtuke (device info)"; full_url = "/js.php?device="; full_url = "&refferer"
+rule_name = "ClickFix (step1)"; response_body = "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O"; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates (hacked site)"; response_body = '/win/jj.js"></script>'; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates"; response_body = "/splitter.ai/"; response_body = "[0].appendChild(a)"; emoji_name = ":fish:"
+rule_name = "SuperCool Fake Updates payload"; full_url = "ChromeUpdateInstall.js"; full_url = "/w/"; emoji_name = ":fish:"
+rule_name = "Fake Authenticator"; response_body = "yourFileName.zip"; response_body = "downloadButton1"
+rule_name = "fakechromebookupdate"; response_body = "i.ibb.co"; response_body = "Your ${browserName}"
+rule_name = "Unknown injection (Java)"; response_body = /getElementsByTagName\("head"\)\[0\],b="script",c=atob\(/
+rule_name = "SG middlewear"; response_body = /^;\(function/; response_body = /==?'\);$/; emoji_name = ":arrow_forward:"
+rule_name = "Parrot TDS"; response_body = "var zqxw,HttpClient,rand,token;"
+rule_name = "Parrot TDS (call)"; full_url = /\/init.js\?ver=[a-z0-9]{21,22}/
+rule_name = "ClickFix typo"; response_body = "<title>Google Captcha Verifycation"; response_body = "=>(function()"
+rule_name = "ClickFix CF"; response_body = "<title>Checking if you are human</title>"; response_body = "step0Elements"; response_body = "navigator.clipboard.writeText"
+rule_name = "CoreSecThree"; full_url = /\/api\/getFrameUrl/; response_body = '"url"'
+rule_name = "CoreSecThree"; full_url = /\/api\/getUrl/; response_body = '"url"'
+rule_name = "CoreSecThree (ClickFix)"; full_url = /\/wordpress\?domain=/; response_body = 'Verify you are human'
+rule_name = "ClickFix IRS"; response_body = "sendCaptchaData(itemId)"; response_body = "someEdit"
+
+# Social engineering (scams)
+rule_name = "Balada injector (json)"; full_url = "base64eJyrVkrLzClJLVKyUqqOUc"
+
+# Social engineering (tech support scams)https://docs.google.com/spreadsheets/d/1p9zjK1W8Iw3WqytEhPJ_eMKKslwUavLtPZ9XpmWTGGs/edit?gid=504217357#gid=504217357
+rule_name = "TechScam1"; full_url = "web.core.windows.net"; response_body = "** Microsoft Windows is infected"
+rule_name = "TechScam2"; response_body = "W0in0sNw0Shu1Er887"
+rule_name = "TechScam3"; full_url = /W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887/
+rule_name = "TechScam4"; full_url = /web\.core\.windows\.net\/(Ma|Wi)0[a-z]0HelpErr0ShA52\//; emoji_name = ":phone:"
+rule_name = "TechScam5"; response_body = "stroka"; response_body = "var phone = getVariableFromURl"; emoji_name = ":phone:"
+rule_name = "TechScam6"; response_body = "var ph0ne"; response_body = "Your device has been blocked"; emoji_name = ":phone:"
+rule_name = "TechScam7"; full_url = "USAHTML/?bcda=1"; emoji_name = ":phone:"
+rule_name = "TechScam8"; response_body = "Allow</span>"; response_body = "Deny</span>"; response_body = "case 27:"; emoji_name = ":phone:"
+
+# Credit card skimming
+rule_name = "Kritec skimmer (hacked site)"; response_body = "window.gtmKey[0].lock"; emoji_name = ":credit_card:"
+rule_name = "Kritec skimmer"; full_url = "-loader.js"; response_body = "'readUTF8St'+'ring'"; emoji_name = ":credit_card:"
+rule_name = "Kritec IP"; host_ip = /45.88.3.[0-9]{1,3}/; emoji_name = ":credit_card:"
+rule_name = "Gootag skimmer"; response_body = "appendChild(a)}))})"; response_body = /window,"\w{64}"/; emoji_name = ":credit_card:"
+rule_name = "Gootag skimmer"; response_body = "bi'+'ll''in'+'g_"; response_body = "'exp':o,'cvc'"; emoji_name = ":credit_card:"
+rule_name = "Atob skimmer"; response_body = "atob"; response_body = "aHR0cH"; response_body = "cvv "; emoji_name = ":credit_card:"
+rule_name = "img skimmer"; response_body = "fkhfnrxw"; response_body = "rqhsdjh"; emoji_name = ":credit_card:"
+rule_name = "Skimmer Hex"; response_body = "\x5B\x63\x63\x5F\x6E\x75\x6D\x62\x65\x72\x5D"; emoji_name = ":credit_card:"
+rule_name = "wrapperz skimmer"; response_body = "csc-cc-entry"; response_body = "wrapperz"
+rule_name = "icu skimmer"; response_body = /localStorage\[U\w\(/; response_body = "atob"; emoji_name = ":credit_card:"
+rule_name = "CosmicSting skimmer"; response_body = "cardnumber-kao153"; response_body = "cvv"; emoji_name = ":credit_card:"
+rule_name = "skins skimmer"; response_body = "jQuery['ajax']({'url'"; response_body = "](atob"; response_body = "encodeURIComponent,location"; emoji_name = ":credit_card:"
+rule_name = "fiza skimmer"; response_body = "fiza="; response_body = "cvv\x22"; emoji_name = ":credit_card:"
+rule_name = "atob skimmer"; response_body = "{'url':atob('aHR0cHM6L"; response_body = "cc_number"; emoji_name = ":credit_card:"
+rule_name = "imageDirectory skimmer"; response_body = "imageDirectory=btoa(btoa"; emoji_name = ":credit_card:"
+rule_name = "MagicTrick skimmer"; response_body = "function performMagicTrick()"; response_body = "generateId"; emoji_name = ":credit_card:"
+rule_name = "GAO skimmer"; response_body = "i.atob(r)"; response_body = "+i.atob(o)"; emoji_name = ":credit_card:"
+rule_name = "5555 skimmer"; response_body = "url5555, true"; emoji_name = ":credit_card:"
+rule_name = "crm skimmer"; response_body = "crm-cvv"; response_body = "crmSend"; emoji_name = ":credit_card:"
+rule_name = "GTAG/CSS skimmer"; response_body = "link.links::before"; response_body = "atob("; emoji_name = ":credit_card:"
+
+# Phishing
+rule_name = "XXX phishing kit"; response_body = 'url: "xxx.php"'; response_body = "if(username.length > 3 && password"; emoji_name = ":fish:"
+rule_name = "Rockstar2FA (main)"; response_body = "generateRandomTitle()"; emoji_name = ":fish:"
+rule_name = "Rockstar2FA (credstealer)"; full_url = /\/validate_captcha.php/; emoji_name = ":fish:"
+rule_name = "Rockstar2FA (credstealer)"; response_body = "function processEmailFromUrl()"; response_body = "function verifyphonenmbrh()"; emoji_name = ":fish:"
+rule_name = "Mamba 2FA"; full_url = "/?c3Y9bzM2NV"; emoji_name = ":fish:"
+rule_name = "Tycoon (main)"; response_body = ' == "nomatch"'; response_body = /document.write\(decodeURIComponent\(escape\(atob\(/; response_body = ' !== "nomatch"'; emoji_name = ":fish:"
+rule_name = "Tycoon (Microsoft)"; response_body = /function\s(tryfindingele|selectmultipleaccountadfs)/; emoji_name = ":fish:"
+rule_name = "Tycoon (Google)"; response_body = /function twofamethodclick/; emoji_name = ":fish:"
+rule_name = "Tycoon (websocket)"; full_url = "/web7socket/socket.io/"; emoji_name = ":fish:"
+rule_name = "Tycoon (websocket)"; full_url = "/web8socket/socket.io/"; emoji_name = ":fish:"
+rule_name = "Tycoon2FA (checker)"; full_url = /\/[a-z]+[@\$!][a-z0-9]+$/; response_body = /^(0|1)$/; emoji_name = ":fish:"
+rule_name = "Tycoon2FA (main)"; response_body = /{"[a-d]":"[^"]+","[a-d]":"[^"]+","[a-d]":"[^"]+","[a-d]":"[^"]+"}/; emoji_name = ":fish:"
+rule_name = "FlowerStorm"; full_url = "/next.php"; response_body = '{"status":false}'; emoji_name = ":fish:"
+rule_name = "FlowerStorm"; full_url = "/bootstrap.min.js"; response_body = "function submitPass()"; response_body = "verifyOtpCode"; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/index/; response_body = 'var captchaChecked = false;'; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /cf-turnstile-response=/; response_body = 'var random ='; response_body = 'var autograb = false;'; emoji_name = ":fish:"
+rule_name = "Sneaky2FA"; full_url = /[a-zA-Z0-9]{,20}\/verify/; response_body = 'URL=https://href.li/?https://en.wikipedia.org/'; response_body = 'Approve a request on my Microsoft Authenticator app'; emoji_name = ":fish:"
+rule_name = "Kratos"; response_body = "console.log"; response_body = "-- Drink Section --"; emoji_name = ":fish:"
+
+# Fingerprinting/obfuscation
+rule_name = "Fingerprinting (VM detection)"; response_body = "<noscript>You need"; response_body = "getTimezoneOffset"; response_body = "video/mp4"; response_body = "WEBGL_debug_renderer_info"
+rule_name = "Obfuscation"; response_body = "base64,ZnVuY3Rpb24gXzB4"
+rule_name = "Google CAPTCHA"; response_body = '<form id="captcha-form"'; response_body = '<div id="recaptcha"'
+
+# Misc
+rule_name = "Google Ad URL"; full_url = "/aclk?sa=L&ai="; emoji_name = ":newspaper:"
