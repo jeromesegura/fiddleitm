@@ -1,0 +1,1236 @@
+[
+   {
+    "rule_name": "MY RULE",
+    "reference": "https://owasp.org/www-project-top-ten/2021/A01_2021-Broken_Access_Control.html",
+	"emoji_name": ":file_folder:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "docu[a-z]ents",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "SocGholish (ajax injection)",
+    "reference": null,
+	"emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/admin-ajax-js",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "window,document,'script','https://",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SocGholish (html)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": ";function sendStatistics(type)",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "class=\\\"browser-landing\\\"",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "SocGholish JS",
+    "emoji_name": ":file_folder:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "var filename=\"Update.js\"",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "filename.substr(-4)=='.iso'",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "FakeDomen",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "domen",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "detecct",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "linkDesktop",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SmartApeSG (injection)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "function generateRandomString",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "function checkLastVisit",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SmartApeSG (ClickFix)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "const nE=",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "curl.exe",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Gootloader",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/\\?a\\w{6}=[0-9]{7}$",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "/*",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "FakeBat payload",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/upload",
+        "type": "string"
+      },
+      {
+        "key": "full_url",
+        "value": "UpdateSetup-x86.msix$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClearFake injection",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "base64,ZnVuY3Rpb24gXzB4",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "J2V0aF9jYWxs",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClearFake iframe",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "var payload = atob",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "function copyCode()",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "FIN7 phishing page",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "Requires Browser Extension",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "special\\s[bB]rowser\\s[eE]xtension",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Binance",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "bsc-dataseed1\\.binance\\.org|bsc-dataseed3\\.defibit\\.io",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kongtuke JS",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "&refferer",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "/js.php?device=",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kongtuke (device info)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/js.php?device=",
+        "type": "string"
+      },
+      {
+        "key": "full_url",
+        "value": "&refferer",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClickFix (step1)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SuperCool Fake Updates (hacked site)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "/win/jj.js\"></script>",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SuperCool Fake Updates",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "/splitter.ai/",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "[0].appendChild(a)",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "SuperCool Fake Updates payload",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "ChromeUpdateInstall.js",
+        "type": "string"
+      },
+      {
+        "key": "full_url",
+        "value": "/w/",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Fake Authenticator",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "yourFileName.zip",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "downloadButton1",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "fakechromebookupdate",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "i.ibb.co",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "Your ${browserName}",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Unknown injection (Java)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "getElementsByTagName\\(\\\"head\\\"\\)\\[0\\],b=\\\"script\\\",c=atob\\(",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "SG middlewear",
+    "emoji_name": ":arrow_forward:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "^;\\(function",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "==?'\\);$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Parrot TDS",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "var zqxw,HttpClient,rand,token;",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Parrot TDS (call)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/init\\.js\\?ver=[a-z0-9]{21,22}",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClickFix typo",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "<title>Google Captcha Verifycation",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "=>(function()",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClickFix CF",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "<title>Checking if you are human</title>",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "step0Elements",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "navigator.clipboard.writeText",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "CoreSecThree",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/api\\/getFrameUrl",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "\"url\"",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "CoreSecThree",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/api\\/getUrl",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "\"url\"",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "CoreSecThree (ClickFix)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/wordpress\\?domain=",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "Verify you are human",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "ClickFix IRS",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "sendCaptchaData(itemId)",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "someEdit",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Balada injector (json)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "base64eJyrVkrLzClJLVKyUqqOUc",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam1",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "web.core.windows.net",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "** Microsoft Windows is infected",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam2",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "W0in0sNw0Shu1Er887",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam3",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "W0in0sNw0Shu1Er887|M0ac0sNw0Shu1Er887",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam4",
+    "emoji_name": ":phone:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "web\\.core\\.windows\\.net\\/(Ma|Wi)0[a-z]0HelpErr0ShA52\\/",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam5",
+    "emoji_name": ":phone:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "stroka",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "var phone = getVariableFromURl",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam6",
+    "emoji_name": ":phone:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "var ph0ne",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "Your device has been blocked",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam7",
+    "emoji_name": ":phone:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "USAHTML/?bcda=1",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "TechScam8",
+    "emoji_name": ":phone:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "Allow</span>",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "Deny</span>",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "case 27:",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kritec skimmer (hacked site)",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "window.gtmKey[0].lock",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kritec skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "-loader.js",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "'readUTF8St'+'ring'",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kritec IP",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "host_ip",
+        "value": "45\\.88\\.3\\.[0-9]{1,3}",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Gootag skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "appendChild(a)}))})",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "window,\"\\w{64}\"",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Gootag skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "bi'+'ll''in'+'g_",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "'exp':o,'cvc'",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Atob skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "atob",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "aHR0cH",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "cvv ",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "img skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "fkhfnrxw",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "rqhsdjh",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Skimmer Hex",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "\\x5B\\x63\\x63\\x5F\\x6E\\x75\\x6D\\x62\\x65\\x72\\x5D",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "wrapperz skimmer",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "csc-cc-entry",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "wrapperz",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "icu skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "localStorage\\[U\\w\\(",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "atob",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "CosmicSting skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "cardnumber-kao153",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "cvv",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "skins skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "jQuery['ajax']({'url'",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "](atob",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "encodeURIComponent,location",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "fiza skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "fiza=",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "cvv\\x22",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "atob skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "{'url':atob('aHR0cHM6L",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "cc_number",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "imageDirectory skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "imageDirectory=btoa(btoa",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "MagicTrick skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "function performMagicTrick()",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "generateId",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "GAO skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "i.atob(r)",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "+i.atob(o)",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "5555 skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "url5555, true",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "crm skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "crm-cvv",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "crmSend",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "GTAG/CSS skimmer",
+    "emoji_name": ":credit_card:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "link.links::before",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "atob(",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "XXX phishing kit",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "url: \"xxx.php\"",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "if(username.length > 3 && password",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Rockstar2FA (main)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "generateRandomTitle()",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Rockstar2FA (credstealer)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/validate_captcha.php",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Rockstar2FA (credstealer)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "function processEmailFromUrl()",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "function verifyphonenmbrh()",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Mamba 2FA",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/?c3Y9bzM2NV",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon (main)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": " == \"nomatch\"",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "document.write\\(decodeURIComponent\\(escape\\(atob\\(",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": " !== \"nomatch\"",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon (Microsoft)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "function\\s(tryfindingele|selectmultipleaccountadfs)",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon (Google)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "function twofamethodclick",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon (websocket)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/web7socket/socket.io/",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon (websocket)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/web8socket/socket.io/",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon2FA (checker)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "\\/[a-z]+[@$!][a-z0-9]+$",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "^(0|1)$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "Tycoon2FA (main)",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "{\"[a-d]\":\"[^\"]+\",\"[a-d]\":\"[^\"]+\",\"[a-d]\":\"[^\"]+\",\"[a-d]\":\"[^\"]+\"}",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "rule_name": "FlowerStorm",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/next.php",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "{\"status\":false}",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "FlowerStorm",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/bootstrap.min.js",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "function submitPass()",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "verifyOtpCode",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Sneaky2FA",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "[a-zA-Z0-9]{,20}\\/index",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "var captchaChecked = false;",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Sneaky2FA",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "cf-turnstile-response=",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "var random =",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "var autograb = false;",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Sneaky2FA",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "[a-zA-Z0-9]{,20}\\/verify",
+        "type": "regex"
+      },
+      {
+        "key": "response_body",
+        "value": "URL=https://href.li/?https://en.wikipedia.org/",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "Approve a request on my Microsoft Authenticator app",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Kratos",
+    "emoji_name": ":fish:",
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "console.log",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "-- Drink Section --",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Fingerprinting (VM detection)",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "<noscript>You need",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "getTimezoneOffset",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "video/mp4",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "WEBGL_debug_renderer_info",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Obfuscation",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "base64,ZnVuY3Rpb24gXzB4",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Google CAPTCHA",
+    "emoji_name": null,
+    "conditions": [
+      {
+        "key": "response_body",
+        "value": "<form id=\"captcha-form\"",
+        "type": "string"
+      },
+      {
+        "key": "response_body",
+        "value": "<div id=\"recaptcha\"",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "rule_name": "Google Ad URL",
+    "emoji_name": ":newspaper:",
+    "conditions": [
+      {
+        "key": "full_url",
+        "value": "/aclk?sa=L&ai=",
+        "type": "string"
+      }
+    ]
+  }
+]
