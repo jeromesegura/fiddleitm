@@ -1,148 +1,129 @@
-# fiddleitm v.0.5
-
-"Fiddle in the Middle" (**fiddleitm**) is a [**mitmproxy**](https://github.com/mitmproxy/mitmproxy) addon designed for security researchers interested in capturing and analyzing web-based threats. It provides rules to detect and visualize malicious traffic in mitmweb, mitmproxy's graphical interface.
-
-Rules are based on string and regex patterns found within a [flow](https://docs.mitmproxy.org/stable/api/mitmproxy/flow.html) (hostname, IP address, URI, HTML/JS and more). In addition to the built-in [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt), you can also add your own (see further down below for instructions).
-
-![image](https://github.com/user-attachments/assets/bd88835a-19c7-4413-b029-a279ade576e2)
-
-**Usage:**
-
-`mitmweb -s fiddleitm.py`
-
-Note: you can also run mitmproxy or mitmdump and have the rules applied to flows.
-
-Options:
-
-* override default user-agent: ``--set custom_user_agent=""``
-
-* override default referer: ``--set custom_referer=""``
-
-* overrride default accept-language: ``--set custom_accept_language=""``
-
-* log events for rules that match flows (writes to *rules.log*): ``--set log_events=true``
-
-* drop traffic containing image, sound and video files: ``--set traffic_lite=true``
-
-* add upstream proxy: ``--mode upstream:http://proxyhost:port --upstream-auth username:password``
-
-# Features
-
-## Malicious traffic detection based on rules
-
-Currently, **fiddleitm** inspects the following:
-
-* remote host name
-* remote host IP address
-* remote host full URL
-* response body
-* response body SHA256
-
-Predefined [rules](https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt) are loaded from this GitHub repository.
-
-You can add your own rules to a file called ``localrules.txt`` placed in the same directory as ``fiddleitm.py``.
-
-**Syntax for rules:**
-
-``rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...``
-
-or
- 
- ``rule_name = 'rule name'; condition 1 = 'string' ; condition 2 = /regex/; condition n = ...``
-
-**List of conditions:**
-
-* ``host_name``
-
-* ``host_ip``
-
-* ``full_url``
-
-* ``response_body``
-
-* ``response_body_sha256``
-
-**Optional:**
-* ``emoji_name``
-  (Displays an emoji to mark the flow. Please note that the `emoji_name` must be placed at the end of your rule. List of emojis: https://api.github.com/emojis)
-
-**Example:**
-
-``rule_name = "My first rule"; full_url = /[a-z]{5}\.js/; response_body = "DevTools"; emoji_name = ":grapes:"``
-
-## Automatic updater
-
-Since v.0.2, if a new version of fiddleitm is available, you will get prompted to install it whenever you run the script:
-
-![image](https://github.com/user-attachments/assets/e4394475-d9e8-4d5e-98a2-ee4cc5dafd57)
-
-The updater also displays the latest version of mitmproxy.
-
-## Search flows
-
-This feature is not currently supported in mitmweb, but fiddleitm provides a way to search using a regex via a command. You first need to enable the command line in the UI, by going to Options -> Display Command Bar.
-
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/ece9bc20-a3db-45ac-a0c1-07b299338c4b)
-
-Then type: ```fiddleitm.search @all regex here```
-
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/fd80ae85-0d11-4126-aba7-da037f715106)
-
-You can replace @all by @shown @focus @marked @unmarked @hidden
-
-The search results will be printed in the CLI as well as marked in the UI:
-
-![image](https://github.com/malwareinfosec/fiddleitm/assets/25351665/293d6fc1-afe3-4727-aaef-26657fc17892)
-
-You can also search for a response body SHA256
-
-```fiddleitm.search @all SHA256```
-
-## Print (copy to clipboard) flow URLs that have been detected by a rule
-
-This command allows you to print the flow URLs that matched your rules. See above on how to enter commands.
-
-```fiddleitm.printurls @all```
-
-## Run rules manually
-
-This command updates and executes rules (both ```rules.txt``` and ```localrules.txt```) on the selected traffic. This is useful if you are testing a new rule in your ```localrules.txt```.
-
-```fiddleitm.runrules @all```
-
-## Updates rules manually
-
-This command lets you reload both ```rules.txt``` and ```localrules.txt``` without the need to restart fiddleitm:
-
-```fiddleitm.updaterules```
-
-## Connect-the-dots
-
-This command helps you retrace each step that lead to a particular flow (requires mitmproxy v10.4.0):
-
-```fiddleitm.connect @all [flow #]```
-
-![image](https://github.com/user-attachments/assets/4124b61a-e11e-4de5-999c-4b10cfff4dfb)
-
-## Clear comments
-
-This command clears all comments from flow:
-
-```fiddleitm.clear @all```
-
-## Filters (ignore hostnames)
-
-If you would like to reduce noise coming from certain hostnames, create a text file called ```hostname_filter.txt``` in the same directory as the script and add as many hostnames as you'd like (one per line).
-
-## Anti-VM detection and evasion
-
-Threat actors can use JavaScript code to fingerprint visitors and detect if they are running a virtual machine (VMware, VirtualBox). In some instances, this works by collecting information such as video drivers, renders, etc. and then sending that information backed to the server via a POST request.
-
-fiddleitm intercepts such attempts and replaces certain keywords commonly used to detect virtual machines with random words.
-
-![image](https://github.com/jeromesegura/fiddleitm/assets/162072386/3dab8c57-2c16-4485-ab37-f1a9acdb92aa)
-
-## Replaying traffic flows
-
-````mitmweb -s .\fiddleitm.py --server-replay [saved_flows] --server-replay-reuse --set connection_strategy=lazy````
-
+This document describes **`fiddleitm`**, a mitmproxy addon designed to identify malicious web traffic. It provides detailed information on its features, installation, usage, and configuration options.
+
+![image](https://github.com/user-attachments/assets/e34d4836-88aa-413b-b5b9-748ff2f763c2)
+
+---
+
+## Features
+
+`fiddleitm` offers the following functionalities:
+
+* **Malicious Traffic Detection**: Inspects HTTP flows against a set of predefined and local rules to identify suspicious patterns.
+* **Custom Headers**: Allows modification of **`User-Agent`**, **`Referer`**, and **`Accept-Language`** headers for all requests.
+* **Traffic Filtering**: Includes a "traffic lite" mode to drop requests for common image and video file extensions, reducing noise.
+* **Rule Management**: Supports loading rules from a remote GitHub repository and a local JSON file (`localrules.json`).
+* **Real-time Alerts**: Notifies the user in the mitmproxy console when a rule matches a flow.
+* **Event Logging**: Option to log details of matched rules to a file named **`rules.log`** for later analysis.
+* **Self-Update**: Checks for and offers to install updates for `fiddleitm` directly from GitHub.
+* **On-demand Rule Re-evaluation**: Provides a mitmproxy command to reload rules and re-evaluate them against selected flows.
+
+---
+
+## Installation
+
+To use `fiddleitm`, you need to have `mitmproxy` installed.
+
+1.  **Save the Addon**: Save the provided code as a Python file (e.g., `fiddleitm.py`) in a location accessible to `mitmproxy`.
+2.  **Install Dependencies**: Ensure you have the `requests` library installed:
+    ```bash
+    pip install requests
+    ```
+
+---
+
+## Usage
+
+Run `mitmweb`with the `-s` flag followed by the path to the `fiddleitm.py` file:
+
+* **mitmweb (web interface)**:
+    ```bash
+    mitmweb -s fiddleitm.py
+    ```
+---
+
+## Configuration Options
+
+You can customize `fiddleitm`'s behavior using `mitmproxy`'s `--set` option:
+
+* **`--set custom_user_agent="YourCustomUserAgent"`**:
+    Overrides the default User-Agent header for all requests.
+* **`--set custom_referer="http://your.custom.referer"`**:
+    Overrides the default Referer header for all requests.
+* **`--set custom_accept_language="en-US,en;q=0.9"`**:
+    Overrides the default Accept-Language header for all requests.
+* **`--set log_events=true`**:
+    Enables logging of matched rule events to a file named `rules.log` in the current directory.
+* **`--set traffic_lite=true`**:
+    Activates "traffic lite" mode, which automatically drops requests for common image and video file extensions (e.g., `.jpg`, `.mp4`, `.gif`).
+* **`--mode upstream:http://proxyhost:port --upstream-auth username:password`**:
+    Configures an upstream proxy for `mitmproxy` itself, allowing `fiddleitm` to operate through another proxy.
+
+---
+
+## Rule Management
+
+`fiddleitm` uses a JSON-based rule system. Rules are loaded from two sources:
+
+1.  **Remote Rules**: Automatically downloaded from `https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.json` if an internet connection is available.
+2.  **Local Rules**: Loaded from **`localrules.json`** in the same directory as `fiddleitm.py`. This file allows you to add your own custom rules without modifying the addon's source code.
+
+### Rule Structure
+
+Each rule in the JSON file is an object with the following structure:
+
+```json
+[
+  {
+    "rule_name": "Rule example",
+    "emoji_name": ":sparkles:",
+    "reference": "https://github.com/",
+    "conditions": [
+      [
+        { "key": "full_url", "type": "string", "value": "example.com" },
+        { "key": "response_body", "type": "regex", "value": "dom[a-z]in" },
+        { "key": "response_body_size", "type": "numeric_greater_than", "value": 100 }
+      ],
+      [
+        { "key": "full_url", "type": "string", "value": "mitmproxy.org" },
+        { "key": "response_body", "type": "string", "value": "free and open source" }
+      ]
+    ]
+  }
+]
+```
+<img width="916" alt="image" src="https://github.com/user-attachments/assets/e17d0ae7-60af-43b7-ae88-54447926a996" />
+
+* **`rule_name`**: A descriptive name for the rule.
+* **`emoji_name`**: (Optional) An emoji to display in mitmproxy's flow list when the rule matches (e.g., `:skull:`).
+* **`reference`**: (Optional) A URL providing more context or information about the detected threat.
+* **`conditions`**: A list of condition groups.
+    * **Outer List (OR Logic)**: Each inner list represents an "AND" group of conditions. If *any* of these inner "AND" groups evaluate to true, the entire rule matches.
+    * **Inner List (AND Logic)**: All conditions within a single inner list must evaluate to true for that group to match.
+
+### Condition Types
+
+* **`key`**: Specifies the part of the HTTP flow to inspect:
+    * `full_url`: The complete URL of the request.
+    * `url_path`: The path component of the URL.
+    * `url_host`: The hostname of the URL.
+    * `host_ip`: The IP address of the server.
+    * `response_body`: The decoded content of the HTTP response body.
+    * `request_body`: The decoded content of the HTTP request body.
+    * `response_body_sha256`: SHA256 hash of the response body.
+    * `request_header_HEADERNAME`: Any request header (e.g., `request_header_user-agent`).
+    * `response_header_HEADERNAME`: Any response header (e.g., `response_header_content-type`).
+    * `status_code`: The HTTP response status code (as a string).
+    * `response_body_size`: The size of the response body in bytes.
+* **`type`**: The type of comparison to perform:
+    * **`string`**: Checks if the `value` is present as a substring within the key's data (case-sensitive).
+    * **`regex`**: Checks if the `value` (a Python regular expression string) matches any part of the key's data.
+    * **`numeric_equals`**: Checks if the key's data (expected to be numeric) is equal to the specified value.
+    * **`numeric_greater_than`**: Checks if the key's data (expected to be numeric) is greater than the specified value.
+    * **`numeric_lesser_than`**: Checks if the key's data (expected to be numeric) is lesser than the specified value.
+
+## Commands
+
+`fiddleitm` provides one command to run rules manually (Options -> Display Command Bar.)
+
+* **`:fiddleitm.runrules @all`**:
+    Reloads all rules (both main and local) and re-evaluates them against all currentl HTTP flows. You can also select specific flows in the mitmproxy interface and run the command to apply rules only to those selected flows. This is useful after modifying `localrules.json` to immediately see the effect without restarting mitmproxy.
