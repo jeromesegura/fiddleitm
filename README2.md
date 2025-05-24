@@ -116,9 +116,9 @@ Each rule in the JSON file is an object with the following structure:
 * **`type`**: The type of comparison to perform:
     * **`string`**: Checks if the `value` is present as a substring within the key's data (case-sensitive).
     * **`regex`**: Checks if the `value` (a Python regular expression string) matches any part of the key's data.
-    * * **`numeric_equals`**: Checks if the key's data (expected to be numeric) is equal to the specified value.
+    * **`numeric_equals`**: Checks if the key's data (expected to be numeric) is equal to the specified value.
     * **`numeric_greater_than`**: Checks if the key's data (expected to be numeric) is greater than the specified value.
-    * * **`numeric_lesser_than`**: Checks if the key's data (expected to be numeric) is lesser than the specified value.
+    * **`numeric_lesser_than`**: Checks if the key's data (expected to be numeric) is lesser than the specified value.
 
 ## Commands
 
