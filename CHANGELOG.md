@@ -1,5 +1,10 @@
 # Release History
 
+## May 24 2025: fiddleitm 1.0
+
+- complete rewrite
+- new rules engine (JSON)
+
 ## February 1 2025: fiddleitm 0.5
 
 - added Google Ads and CAPTCHA detection
