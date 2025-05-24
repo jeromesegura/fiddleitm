@@ -126,4 +126,4 @@ Each rule in the JSON file is an object with the following structure:
 `fiddleitm` provides one command to run rules manually (Options -> Display Command Bar.)
 
 * **`:fiddleitm.runrules @all`**:
-    Reloads all rules (both main and local) and re-evaluates them against all currentl HTTP flows. You can also select specific flows in the mitmproxy interface and run the command to apply rules only to those selected flows. This is useful after modifying `localrules.json` to immediately see the effect without restarting mitmproxy.
+    Reloads all rules (both main and local) and re-evaluates them against all currentl HTTP flows. This is useful after modifying `localrules.json` to immediately see the effect without restarting mitmproxy.
