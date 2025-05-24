@@ -1,15 +1,5 @@
 [
   {
-    "rule_name": "MY RULE",
-    "reference": "https://owasp.org/www-project-top-ten/2021/A01_2021-Broken_Access_Control.html",
-    "emoji_name": ":file_folder:",
-    "conditions": [
-      [
-        { "key": "response_body", "value": "docu[a-z]ents", "type": "regex" }
-      ]
-    ]
-  },
-  {
     "rule_name": "SocGholish (ajax injection)",
     "reference": null,
     "emoji_name": null,
@@ -882,24 +872,6 @@
     "conditions": [
       [
         { "key": "full_url", "value": "/aclk?sa=L&ai=", "type": "string" }
-      ]
-    ]
-  },
-  {
-    "rule_name": "Example OR Rule",
-    "reference": "https://example.com/or-rule",
-    "emoji_name": ":bulb:",
-    "conditions": [
-      [
-        { "key": "full_url", "value": "example.com/login", "type": "string" },
-        { "key": "response_body", "value": "Incorrect password", "type": "string" }
-      ],
-      [
-        { "key": "status_code", "value": "401", "type": "string" },
-        { "key": "header", "value": "WWW-Authenticate: Basic", "type": "string" }
-      ],
-      [
-        { "key": "response_body", "value": "Access Denied", "type": "string" }
       ]
     ]
   }
