@@ -72,32 +72,24 @@ You can customize `fiddleitm`'s behavior using `mitmproxy`'s `--set` option:
 Each rule in the JSON file is an object with the following structure:
 
 ```json
-{
-  "rule_name": "Example Malicious Pattern",
-  "emoji_name": ":skull:",
-  "reference": "https://example.com/malware-info",
-  "conditions": [
-    [
-      {
-        "key": "full_url",
-        "type": "regex",
-        "value": "evil\\.com/payload"
-      },
-      {
-        "key": "response_body",
-        "type": "string",
-        "value": "malicious_script_injection"
-      }
-    ],
-    [
-      {
-        "key": "response_body_size",
-        "type": "numeric_greater_than",
-        "value": 102400
-      }
+[
+  {
+    "rule_name": "Rule example",
+    "emoji_name": ":sparkles:",
+    "reference": "https://github.com/",
+    "conditions": [
+      [
+        { "key": "full_url", "type": "string", "value": "example.com" },
+        { "key": "response_body", "type": "regex", "value": "dom[a-z]in" },
+        { "key": "response_body_size", "type": "numeric_greater_than", "value": 100 }
+      ],
+      [
+        { "key": "full_url", "type": "string", "value": "mitmproxy.org" },
+        { "key": "response_body", "type": "string", "value": "free and open source" }
+      ]
     ]
-  ]
-}
+  }
+]
 ```
 
 * **`rule_name`**: A descriptive name for the rule.
@@ -124,7 +116,9 @@ Each rule in the JSON file is an object with the following structure:
 * **`type`**: The type of comparison to perform:
     * **`string`**: Checks if the `value` is present as a substring within the key's data (case-sensitive).
     * **`regex`**: Checks if the `value` (a Python regular expression string) matches any part of the key's data.
+    * * **`numeric_equals`**: Checks if the key's data (expected to be numeric) is equal to the specified value.
     * **`numeric_greater_than`**: Checks if the key's data (expected to be numeric) is greater than the specified value.
+    * * **`numeric_lesser_than`**: Checks if the key's data (expected to be numeric) is lesser than the specified value.
 
 ## Commands
 
