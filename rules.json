@@ -890,15 +890,15 @@
     "reference": "https://example.com/or-rule",
     "emoji_name": ":bulb:",
     "conditions": [
-      [ # This is one OR group (AND conditions within)
+      [
         { "key": "full_url", "value": "example.com/login", "type": "string" },
         { "key": "response_body", "value": "Incorrect password", "type": "string" }
       ],
-      [ # This is another OR group (AND conditions within)
+      [
         { "key": "status_code", "value": "401", "type": "string" },
         { "key": "header", "value": "WWW-Authenticate: Basic", "type": "string" }
       ],
-      [ # A third OR group (single condition)
+      [
         { "key": "response_body", "value": "Access Denied", "type": "string" }
       ]
     ]
