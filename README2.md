@@ -91,6 +91,7 @@ Each rule in the JSON file is an object with the following structure:
   }
 ]
 ```
+<img width="916" alt="image" src="https://github.com/user-attachments/assets/e17d0ae7-60af-43b7-ae88-54447926a996" />
 
 * **`rule_name`**: A descriptive name for the rule.
 * **`emoji_name`**: (Optional) An emoji to display in mitmproxy's flow list when the rule matches (e.g., `:skull:`).
