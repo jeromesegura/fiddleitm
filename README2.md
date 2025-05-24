@@ -33,21 +33,12 @@ To use `fiddleitm`, you need to have `mitmproxy` installed.
 
 ## Usage
 
-Run `mitmproxy`, `mitmweb`, or `mitmdump` with the `-s` flag followed by the path to the `fiddleitm.py` file:
+Run `mitmweb`with the `-s` flag followed by the path to the `fiddleitm.py` file:
 
-* **mitmproxy (console interface)**:
-    ```bash
-    mitmproxy -s fiddleitm.py
-    ```
 * **mitmweb (web interface)**:
     ```bash
     mitmweb -s fiddleitm.py
     ```
-* **mitmdump (scripting only)**:
-    ```bash
-    mitmdump -s fiddleitm.py
-    ```
-
 ---
 
 ## Configuration Options
