@@ -12,7 +12,7 @@ Usage:
 Options:
 
  modify default user-agent with your own --set custom_user_agent=""
- 
+
  modify default referer with your own --set custom_referer=""
 
  modify default accept-language with your own --set custom_accept_language=""
@@ -20,31 +20,6 @@ Options:
  log events for rules that match flows (writes to rules.log) --set log_events=true
 
  add upstream proxy --mode upstream:http://proxyhost:port --upstream-auth username:password
-
-Predefined rules (rules.txt) are loaded from the GitHub repository.
-
-You can add your own rules to a file called localrules.txt placed in the same
-directory as fiddleitm.py
-
-Syntax for rules:
-
- rule_name = "rule name"; condition 1 = "string" ; condition 2 = /regex/; condition n = ...
- or
- rule_name = 'rule name'; condition 1 = 'string' ; condition 2 = /regex/; condition n = ...
-
- List of conditions:
-  host_name
-  host_ip
-  full_url
-  response_body
-  response_body_sha256
-
- Optional:
-  emoji_name
-  (Displays an emoji to mark the flow. List of emojis: https://api.github.com/emojis)
-
- Example:
- rule_name = "My first rule"; full_url = /[a-z]{5}[0-9]{2}/; response_body = "DevTools"; response_body = /function[0-9]{2}/; emoji_name = ":grapes:"
 """
 
 import os
@@ -56,696 +31,724 @@ from datetime import datetime
 from time import strftime, localtime
 import logging
 import typing
-import pyperclip
 from collections.abc import Sequence
 import tempfile
 import shutil
 import sys
+import json
 import mitmproxy
 
 from mitmproxy import http
 from mitmproxy import ctx
 from mitmproxy import command
 from mitmproxy import flow
-from mitmproxy import http
 from mitmproxy import hooks
 from mitmproxy.addonmanager import Loader
 from mitmproxy.ctx import master
-from mitmproxy.log import ALERT
+from mitmproxy.log import ALERT # Keep ALERT for the update message
 from hashlib import sha256
+from packaging.version import parse as parse_version # For robust version comparison
+
+# --- Configuration ---
+# IMPORTANT: Update this version manually when you make a new release on GitHub.
+# Ensure it matches the format of your GitHub release tags (e.g., "1.0.0" if your tag is "v1.0.0")
+# This is your current local version
+CURRENT_LOCAL_VERSION = "1.0" # Updated to reflect your current version in the example
+
+# GitHub repository details for update checking
+GITHUB_REPO_OWNER = "jeromesegura"
+GITHUB_REPO_NAME = "fiddleitm"
+
+RULES_URL = "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.json"
+LOCAL_RULES_FILE = "localrules.json" # Name of your local rules file
+LOG_LEVEL = logging.INFO # Adjust to logging.DEBUG for more verbose output
+
+# --- Content Filtering Configuration ---
+# Only content types explicitly listed here will be processed by rules.
+# If this list is empty, ALL content types will be processed (no content type filtering).
+INCLUDED_CONTENT_TYPES = [
+    "text/html",
+    "text/plain",
+    "text/css",
+    "application/javascript",
+    "text/javascript",          # Variation
+    "application/x-javascript", # Older variation
+    "application/json",
+    "application/xml",
+    "text/xml",                 # Explicit XML
+    "application/xhtml+xml",    # XHTML
+    "application/x-www-form-urlencoded", # Form data
+    "multipart/form-data",      # Form data with files
+    "application/graphql",      # GraphQL APIs
+    "application/ld+json",      # JSON-LD
+    "text/csv",                 # CSV files
+]
+
+# File Extensions for Traffic Lite Mode ---
+# If traffic_lite option is enabled, requests with these extensions will be dropped.
+DROPPED_EXTENSIONS = (
+    ".gif",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".wav",
+    ".mp4",
+    ".svg",     # SVG images
+    ".ico",     # Favicons
+    ".bmp",     # Bitmap images
+    ".tiff",    # TIFF images
+    ".tif",     # TIFF images
+    ".avif",    # AVIF images
+    ".heif",    # HEIF images
+    ".heic",    # HEIC images
+    ".mp3",     # MP3 audio
+    ".ogg",     # Ogg audio/video
+    ".oga",     # Ogg audio
+    ".flac",    # FLAC audio
+    ".aac",     # AAC audio
+    ".webm",    # WebM video/audio
+    ".mov",     # QuickTime video
+    ".avi",     # AVI video
+    ".mkv",     # MKV video
+    ".flv",     # Flash Video
+    ".3gp",     # 3GPP video
+    ".ogv",     # Ogg Video
+    ".ts",      # MPEG Transport Stream
+    ".woff",    # Web Open Font Format
+    ".woff2",   # Web Open Font Format 2
+    ".ttf",     # TrueType Font
+    ".otf",     # OpenType Font
+    ".eot",     # Embedded OpenType
+)
+
+# --- Setup Logging ---
+logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+# --- Helper function to get latest GitHub version ---
+def get_latest_github_version(owner: str, repo: str) -> str | None:
+    """
+    Fetches the latest *release tag name* from a GitHub repository using the API.
+    Uses a requests.Session with trust_env=False for compatibility within mitmproxy.
+    """
+    session = requests.Session()
+    # Crucial for mitmproxy environments to avoid inheriting system proxy
+    session.trust_env = False
+
+    # Use the /releases/latest endpoint
+    api_url = f'https://api.github.com/repos/{owner}/{repo}/releases/latest'
+
+    try:
+        response = session.get(api_url, timeout=10)
+        response.raise_for_status() # Raise an exception for HTTP errors (4xx or 5xx)
+        data = response.json()
+        
+        # The 'tag_name' field holds the version tag
+        return data.get('tag_name')
+    except requests.exceptions.RequestException as e:
+        ctx.log.warn(f"fiddleitm: Failed to fetch latest GitHub release for {owner}/{repo}: {e}")
+        return None
+    except json.JSONDecodeError:
+        ctx.log.warn(f"fiddleitm: Failed to parse GitHub API response for {owner}/{repo} (invalid JSON).")
+        return None
+    except Exception as e:
+        ctx.log.error(f"fiddleitm: An unexpected error occurred while fetching GitHub release: {e}")
+        return None
+
 
 class Fiddleitm:
-    def __init__(self):
-        version_local = "0.5"
-        print('#################')
-        print('fiddleitm v.' + version_local)
-        print('#################')
-        # Initialize variables
-        self.rules = []
-        self.anti_vm_list = [
-            "VMware", "vmtoolsd", "VMwareService", "Vmwaretray", "vm3dservice",
-            "VGAuthService", "Vmwareuser", "TPAutoConnSvc", "VirtualBox", "VBoxService",
-            "VBoxTray", "Fiddler", "FSE2"
-        ]
-        self.do_anti_vm = False        
-        # Call check internet connection function
-        if self.internet_connection():
-            # Call check for latest mitmproxy version
-            self.check_mitmproxy_version()
-            # Call check for fiddleitm update function
-            self.check_fiddleitm_update(version_local)
-            # Call load main rules function
-            self.load_main_rules()
-        else:
-            logging.info('Offline mode')       
-        # Call load local rules function
-        self.load_local_rules()
-        # Check if we need to load the hostname filter
-        fiters_path = os.path.join(os.path.dirname(__file__), 'hostname_filter.txt')
-        if os.path.isfile(fiters_path):
-            self.filters = []
-            with open(fiters_path, 'r') as file:
-                for line in file:
-                    self.filters.append(line.strip())
-            ctx.options.ignore_hosts = self.filters
-            logging.info(" -> " + "Hostname filter loaded successfully")
+    version_local = CURRENT_LOCAL_VERSION # Use the global constant
 
-    """ These are the command-line arguments"""
-    def load(self, loader):
-        loader.add_option(
-            name="log_events",
-            typespec=bool,
-            default=False,
-            help="log events from rules that match",
-        )
-        loader.add_option(
-            name="traffic_lite",
-            typespec=bool,
-            default=False,
-            help="drop images, videos and other large content",
-        )
-        loader.add_option(
-            name="googleads",
-            typespec=bool,
-            default=False,
-            help="drop images, videos and other large content",
-        )
-        loader.add_option(
-            name="custom_user_agent",
-            typespec=str,
-            default="",
-            help="use a custom user-agent from command line",
-        )
-        loader.add_option(
-            name="custom_referer",
-            typespec=str,
-            default="",
-            help="use a custom referer from command line",
-        )
-        loader.add_option(
-            name="custom_accept_language",
-            typespec=str,
-            default="",
-            help="use a custom accept-language from command line",
-        )
+    def __init__(self):
+        """Initializes the Fiddleitm addon."""
+        ctx.log.info('#################')
+        ctx.log.info(f'fiddleitm v.{self.version_local}')
+        ctx.log.info('#################')
+
+        self.parsed_rules = []
+        
+        # Initialize options to their defaults (will be updated by configure hook)
+        self.custom_user_agent = None
+        self.custom_referer = None
+        self.custom_accept_language = None
+        self.log_events_enabled = False
+        self.traffic_lite_enabled = False
+
+        # Determine internet connection status once for __init__ lifecycle
+        self._has_internet_connection = self.internet_connection()
+
+        if self._has_internet_connection:
+            ctx.log.info('Internet connection detected.')
+            self.check_mitmproxy_version()
+            self.check_fiddleitm_update(self.version_local)
+        else:
+            ctx.log.info('Offline mode: No internet connection detected.')
+            logging.info('Offline mode: No internet connection detected.')
+
+        logging.info("Fiddleitm addon initialized.")
+        ctx.log.info("Fiddleitm addon initialized (mitmproxy context).")
+
+        self.load_rules() # load_rules will handle all rule loading, including main and local
+
+    def load(self, loader: Loader):
+        """
+        Mitmproxy addon hook: Called when the addon is loaded.
+        Used to register options.
+        """
         loader.add_option(
             name = "web_columns",
             typespec=typing.Sequence[str],
             default=['index', 'icon', 'method', 'status', 'path', 'size', 'comment'],
             help="use custom columns",
         )
-        
-    """ Check for internet connection"""
-    def internet_connection(self):
-        try:
-            os.environ['no_proxy'] = '*'
-            response = requests.get("https://google.com", timeout=5)
-            return True
-        except requests.ConnectionError:
-            return False
+        loader.add_option(
+            name = "log_events",
+            typespec=bool,
+            default=False,
+            help="Log matched rule events to rules.log file.",
+        )
+        loader.add_option(
+            name = "custom_user_agent",
+            typespec=typing.Optional[str],
+            default=None,
+            help="Set a custom User-Agent header for all requests.",
+        )
+        loader.add_option(
+            name = "custom_referer",
+            typespec=typing.Optional[str],
+            default=None,
+            help="Set a custom Referer header for all requests.",
+        )
+        loader.add_option(
+            name = "custom_accept_language",
+            typespec=typing.Optional[str],
+            default=None,
+            help="Set a custom Accept-Language header for all requests.",
+        )
+        loader.add_option(
+            name = "traffic_lite",
+            typespec=bool,
+            default=False,
+            help="Enable 'traffic lite' mode to drop common image/video requests.",
+        )
 
-    """ Check for the latest version of mitmproxy """
+    def configure(self, updated: typing.Set[str]):
+        """
+        Mitmproxy addon hook: Called when options change.
+        Updates internal state based on changed mitmproxy options.
+        """
+        if "custom_user_agent" in updated:
+            self.custom_user_agent = ctx.options.custom_user_agent
+            ctx.log.info(f"fiddleitm: Custom User-Agent set to: {self.custom_user_agent}")
+        if "custom_referer" in updated:
+            self.custom_referer = ctx.options.custom_referer
+            ctx.log.info(f"fiddleitm: Custom Referer set to: {self.custom_referer}")
+        if "custom_accept_language" in updated:
+            self.custom_accept_language = ctx.options.custom_accept_language
+            ctx.log.info(f"fiddleitm: Custom Accept-Language set to: {self.custom_accept_language}")
+        
+        if "log_events" in updated:
+            self.log_events_enabled = ctx.options.log_events
+            ctx.log.info(f"fiddleitm: Event logging {'enabled' if self.log_events_enabled else 'disabled'}.")
+        
+        if "traffic_lite" in updated:
+            self.traffic_lite_enabled = ctx.options.traffic_lite
+            ctx.log.info(f"fiddleitm: Traffic Lite mode {'enabled' if self.traffic_lite_enabled else 'disabled'}.")
+
     def check_mitmproxy_version(self):
-        response = requests.get("https://github.com/mitmproxy/mitmproxy/releases/latest")
-        if response.status_code:
-            try:
-                mitmproxy_version = response.url.split("/").pop()
-                print('->> The latest version for mitmproxy is: ' + mitmproxy_version)
-            except Exception:
-                logging.error("Failed to read latest mitmproxy version")                
-    
-    """ Check for fiddleitm update """
-    def check_fiddleitm_update(self, version_local):
+        """ Check for the latest version of mitmproxy """
         session = requests.Session()
         session.trust_env = False
-        read_version = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/fiddleitm.py'
-        response = session.get(read_version)
-        if response.status_code:
+        try:
+            response = session.get("https://github.com/mitmproxy/mitmproxy/releases/latest", timeout=5)
+            response.raise_for_status()
+            mitmproxy_version = response.url.split("/").pop()
+            ctx.log.info(f'->> The latest version for mitmproxy is: {mitmproxy_version}')
+        except requests.exceptions.RequestException as e:
+            ctx.log.warn(f"Failed to check mitmproxy version: {e}")
+            logging.warning(f"Failed to check mitmproxy version: {e}")
+
+    def internet_connection(self) -> bool:
+        """ Check for internet connection """
+        try:
+            os.environ['no_proxy'] = '*' # Temporarily bypass any proxy for this check
+            response = requests.get("https://google.com", timeout=5)
+            response.raise_for_status()
+            return True
+        except requests.exceptions.RequestException as e:
+            logging.debug(f"Internet connection check failed: {e}")
+            return False
+        finally:
+            if 'no_proxy' in os.environ:
+                del os.environ['no_proxy'] # Clean up
+
+    def check_fiddleitm_update(self, version_local: str):
+        """ Check for fiddleitm update using the shared get_latest_github_version function. """
+        ctx.log.info(f"fiddleitm: Checking for updates (current version: {version_local})...")
+
+        version_online_str = get_latest_github_version(GITHUB_REPO_OWNER, GITHUB_REPO_NAME)
+        session = requests.Session() # Needs a session for the download later
+        session.trust_env = False
+
+        if version_online_str:
             try:
-                for item in response.text.split("\n"):
-                    if "version_local =" in item:
-                        version_online = item.strip().replace("version_local = \"", "")[:-1]
-                        break
-                if version_local != version_online:
-                    # Play sound
-                    print('\a', end = '')
-                    print('->> A new version of fiddleitm is available from the GitHub repo: v' + version_online + '!')
-                    answer = input('Would you like to install it now? (y/n)\n') 
-                    if answer == "y":
-                        print(f"Installing v." + version_online + "...")
-                        url = "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/fiddleitm.py"
-                        filename = "fiddleitm.py"
+                parsed_version_local = parse_version(version_local)
+                parsed_version_online = parse_version(version_online_str)
+
+                if parsed_version_online > parsed_version_local:
+                    ctx.log.alert('\a') # Bell sound for attention (now back to ALERT for purple)
+                    ctx.log.alert(f'---')
+                    ctx.log.alert(f'### NEW fiddleitm UPDATE AVAILABLE! ###')
+                    ctx.log.alert(f'Your version: {version_local}')
+                    ctx.log.alert(f'Latest version: {version_online_str}')
+                    ctx.log.alert('Fiddleitm will attempt to auto-reload after update. If issues persist, please restart mitmproxy.')
+                    ctx.log.alert(f'---')
+
+                    # Prompt for download - this will block mitmproxy until answered.
+                    # It will appear in the terminal where mitmproxy/mitmweb is run.
+                    answer = input('Would you like to install it now? (y/n)\n')
+                    if answer.lower() == "y":
+                        ctx.log.info(f"Installing v.{version_online_str}...")
+                        # Construct the raw file URL using the tag name
+                        url = f"https://raw.githubusercontent.com/{GITHUB_REPO_OWNER}/{GITHUB_REPO_NAME}/{version_online_str}/fiddleitm.py"
+                        filename = os.path.basename(__file__)
+
                         try:
-                            # Download to a temporary file
+                            # Use a temporary file to download, then replace the original
                             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                                response = requests.get(url)
-                                response.raise_for_status()  # Raise an exception for non-2xx status codes
-                                temp_file.write(response.content)
+                                download_response = session.get(url, timeout=10)
+                                download_response.raise_for_status()
+                                temp_file.write(download_response.content)
 
-                            # Replace the original file with the downloaded content
                             shutil.copy2(temp_file.name, filename)
-
-                            print(f"Downloaded and replaced {filename} successfully!")
+                            ctx.log.info(f"Downloaded and replaced {filename} successfully!")
+                            ctx.log.info("Mitmproxy should auto-reload the new version. If not, please restart.")
                         except requests.exceptions.RequestException as e:
-                            print(f"Error downloading {filename}: {e}")
+                            ctx.log.error(f"Failed to download update from {url}: {e}")
+                        except shutil.Error as e:
+                            ctx.log.error(f"Failed to replace {filename}: {e}. You might need to manually replace it.")
+                        except Exception as e:
+                            ctx.log.error(f"An unexpected error occurred during update: {e}")
                         finally:
                             # Clean up the temporary file
-                            if temp_file.name and os.path.exists(temp_file.name):
+                            if os.path.exists(temp_file.name):
                                 os.remove(temp_file.name)
-            except Exception:
-                logging.error("Failed to read fiddleitm version")
-    
-    """ Main rules are those stored in the GitHub repository """
-    def load_main_rules(self):
-        logging.info("Loading main rules...")
-        session = requests.Session()
-        session.trust_env = False
-        self.rules_url = 'https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt'
-        response = session.get(self.rules_url)
-        if response.status_code:
-            rules = response.text.split('\r\n')
-            # Get rules date
-            rules_date = re.findall(r'Last updated:\s.+', response.text)[0][-11:].strip()
-            # Count number of rules
-            rules_counter = self.add_rules_list(rules)
-            logging.info(" -> " + str(rules_counter) + " main rules loaded successfully (" + rules_date + ")")
-    
-    """ Local rules are your own, stored locally, on the same path as this script """
-    def load_local_rules(self):
-        # Load local rules (if file present)
-        logging.info("Loading local rules...")
-        if os.path.isfile('localrules.txt'):
-            with open('localrules.txt', 'r') as local_rules:
-                rules = local_rules.read().splitlines()
-                # Count number of rules
-                rules_counter = self.add_rules_list(rules)
-                if rules_counter == 0:
-                    logging.info(" -> no rules found!")
-                else:
-                    logging.info(" -> " + str(rules_counter) + " local rules loaded successfully")
-        else:
-            logging.info("No local rules found (localrules.txt)")
-
-    """ Add remote and local rules """
-    def add_rules_list(self, rules):
-        rules_counter = 0
-        for rule in rules:
-            rule = rule.rstrip('\n')
-            # Add rules
-            if rule.startswith("rule_name"):
-                self.rules.append(rule)
-                rules_counter += 1
-        return rules_counter
-
-    """ Convert epoch time to friendly format """
-    def convert_epoch(self,epoch_time):
-        try:
-            local_time = time.localtime(epoch_time)  # Use time.localtime for local time
-            formatted_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
-            return formatted_timestamp
-        except (TypeError, ValueError, OSError, OverflowError):
-            return "Invalid epoch time"
-
-
-    """ Anti-vm replaces certain keywords used for VM detection """
-    def anti_vm(self, flow):
-        request_response = flow.request.text
-        modified_request_response = request_response
-        # Loop through list of keywords to replace """
-        for keyword in self.anti_vm_list:
-            if keyword in request_response:
-                # Replace with random word from list
-                random_list = ["Intel", "svchost", "svchost.exe", "Dell,INC.", "nVidia", "GeForce"]
-                random_word = random.choice(random_list)
-                print('Fingerprinting detected, replacing data in POST request with keyword: ' + random_word)
-                modified_request_response = request_response.replace(keyword, random_word)
-                break
-        return modified_request_response
-
-    """ Check conditions based on both main and local rules """
-    def check_rules(self, flow):
-        # Loop through rules
-        for rule in self.rules:
-            # Create list of elements for each rule
-            elements_list = rule.split("; ")
-            # get rule name
-            rule_name = elements_list[0].replace("rule_name = \"", "").replace("rule_name = \'", "")[:-1]
-            # remove rule name from elements_list
-            elements_list.pop(0)
-            # get emoji_name if it's there by finding its index in the list
-            emoji_index_list = [elements_list.index(l) for l in elements_list if l.startswith('emoji_name = ')]
-            if emoji_index_list:
-                # convert it to an integer
-                emoji_index = int(''.join(map(str, emoji_index_list)))
-                # get emoji_name value
-                emoji_name = elements_list[emoji_index].replace("emoji_name = \"", "").replace("emoji_name = \'", "")[:-1]
-                # remove emoji name from elements_list
-                elements_list.pop(emoji_index)
-            else:
-                emoji_name = None
-            # loop through conditions
-            matched_condition = False
-            for condition in elements_list:
-                if "host_name = \"" in condition or "host_name = \'" in condition:
-                    host_name_string = condition.replace("host_name = \"", "").replace("host_name = \'", "")[:-1]
-                    matched_condition = self.check_hostname_string(flow, rule_name, host_name_string)
-                    if matched_condition == False:
-                        break
-                if "host_name = /" in condition:
-                    host_name_regex = condition.replace("host_name = /", "")[:-1]
-                    matched_condition = self.check_hostname_regex(flow, rule_name, host_name_regex)
-                    if matched_condition == False:
-                        break
-                if "host_ip = \"" in condition or "host_ip = \'" in condition:
-                    host_ip_string = condition.replace("host_ip = \"", "").condition.replace("host_ip = \'", "")[:-1]
-                    matched_condition = self.check_host_ip_string(flow, rule_name, host_ip_string)
-                    if matched_condition == False:
-                        break
-                if "host_ip = /" in condition:
-                    host_ip_regex = condition.replace("host_ip = /", "")[:-1]
-                    matched_condition = self.check_host_ip_regex(flow, rule_name, host_ip_regex)
-                    if matched_condition == False:
-                        break
-                if "response_body = \"" in condition or "response_body = \'" in condition:
-                    response_body_string = condition.replace("response_body = \"", "").replace("response_body = \'", "")[:-1]
-                    matched_condition = self.check_response_body_string(flow, rule_name, response_body_string)
-                    if matched_condition == False:
-                        break
-                if "response_body = /" in condition:
-                    response_body_regex = condition.replace("response_body = /", "")[:-1]
-                    matched_condition = self.check_response_body_regex(flow, rule_name, response_body_regex)
-                    if matched_condition == False:
-                        break
-                if "full_url = \"" in condition or "full_url = \'" in condition:
-                    full_url_string = condition.replace("full_url = \"", "").replace("full_url = \'", "")[:-1]
-                    matched_condition = self.check_full_url_string(flow, rule_name, full_url_string)
-                    if matched_condition == False:
-                        break
-                if "full_url = /" in condition:
-                    full_url_regex = condition.replace("full_url = /", "")[:-1]
-                    matched_condition = self.check_full_url_regex(flow, rule_name, full_url_regex)
-                    if matched_condition == False:
-                        break
-                if "response_body_sha256 = \"" in condition or "response_body_sha256 = \'" in condition:
-                    response_body_sha256 = condition.replace("response_body_sha256 = \"", "").replace("response_body_sha256 = \'", "")[:-1]
-                    matched_condition = self.check_response_body_sha256(flow, rule_name, response_body_sha256)
-                    if matched_condition == False:
-                        break
-
-            # check if we have a match for all conditions
-            if matched_condition:
-                # Call mark_flow function
-                self.mark_flow(flow, rule_name, emoji_name)
-    
-    """ Check for hostname condition (string) """
-    def check_hostname_string(self, flow, rule_name, host_name_string):
-        if host_name_string in flow.request.host:
-            return True
-        else:
-            return False
-
-    """ Check for hostname condition (regex) """
-    def check_hostname_regex(self, flow, rule_name, host_name_regex):
-        if re.search(host_name_regex, flow.request.pretty_url):
-            return True
-        else:
-            return False
-
-    """ Check for IP address condition (string) """
-    def check_host_ip_string(self, flow, rule_name, host_ip_string):
-        try:
-            if host_ip_string in flow.server_conn.peername[0]:
-                return True
-            else:
-                return False
-        except Exception:
-            return False
-
-    """ Check for IP address condition (regex) """
-    def check_host_ip_regex(self, flow, rule_name, host_ip_regex):
-        try:
-            if re.search(host_ip_regex, flow.server_conn.peername[0]):
-                return True
-            else:
-                return False
-        except Exception:
-            return False
-
-    """ Check for response body condition (string) """
-    def check_response_body_string(self, flow, rule_name, response_body_string):
-        # Only check if response exists and matches content-type
-        try:
-            if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt" and \
-               "optimizationguide-pa.googleapis.com" not in flow.request.pretty_url and \
-               "edgedl.me.gvt1.com" not in flow.request.pretty_url:
-                if flow.response:
-                    if flow.response.content:
-                        if "Content-Type" in flow.response.headers:
-                            if "text" in flow.response.headers["Content-Type"] or \
-                               "javascript" in flow.response.headers["Content-Type"] or \
-                               "json" in flow.response.headers["Content-Type"]:
-                                if response_body_string in flow.response.text:
-                                    return True
-                                else:
-                                    return False
-        except Exception as e:
-            if 'encoding' not in str(e):
-                logging.error("error while checking response content (string) for flow: " + str(master.view.index(flow)))
-
-    """ Check for response body condition (regex) """
-    def check_response_body_regex(self, flow, rule_name, response_body_regex):
-        # Only check if response exists and matches content-type
-        try:
-            if flow.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-               flow.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt" and \
-               "optimizationguide-pa.googleapis.com" not in flow.request.pretty_url and \
-               "edgedl.me.gvt1.com" not in flow.request.pretty_url:
-                if flow.response:
-                    if flow.response.content:
-                        if "Content-Type" in flow.response.headers:
-                            if "text" in flow.response.headers["Content-Type"] or \
-                               "javascript" in flow.response.headers["Content-Type"] or \
-                               "json" in flow.response.headers["Content-Type"]:
-                                if re.search(response_body_regex, flow.response.text):
-                                    return True
-                                else:
-                                    return False
-        except Exception as e:
-            if 'encoding' not in str(e):
-                logging.error("error while checking response content (regex) for flow: " + str(master.view.index(flow)))
-                
-    """ Check for response body sha256 condition (string) """
-    def check_response_body_sha256(self, flow, rule_name, response_body_sha256):
-        # Only check if response exists
-        try:
-            if flow.response:
-                if flow.response.content:
-                    response_body_hash = sha256(flow.response.raw_content).hexdigest()
-                    if response_body_sha256 == response_body_hash:
-                        return True
                     else:
-                        return False
-        except Exception as e:
-            if 'encoding' not in str(e):
-                logging.error("error while checking response body sha256 for flow: " + str(master.view.index(flow)))            
-    
-
-    """ Check for full URL condition (string) """
-    def check_full_url_string(self, flow, rule_name, full_url_string):
-        if full_url_string in flow.request.pretty_url:
-            return True
+                        ctx.log.info("Update deferred by user.")
+                else:
+                    ctx.log.info(f"fiddleitm: You are running the latest version ({version_local}).")
+            except Exception as e:
+                ctx.log.warn(f"fiddleitm: Error comparing versions ('{version_local}' vs '{version_online_str}'): {e}")
         else:
-            return False
+            ctx.log.warn("fiddleitm: Could not retrieve online version for update check.")
 
-    """ Check for full URL condition (regex) """
-    def check_full_url_regex(self, flow, rule_name, full_url_regex):
-        if re.search(full_url_regex, flow.request.pretty_url):
-            return True
+    def _compile_regexes(self, rules_list):
+        """
+        Helper method to compile regex strings within the loaded rules.
+        Modifies rules_list in place.
+        Now handles nested conditions for OR logic.
+        """
+        for rule in rules_list:
+            if "conditions" in rule and isinstance(rule["conditions"], list):
+                # Iterate through each inner array (AND group)
+                for and_group in rule["conditions"]:
+                    if isinstance(and_group, list):
+                        # Iterate through each single condition within the AND group
+                        for condition in and_group:
+                            if condition.get("type") == "regex":
+                                value_str = condition.get("value")
+                                if value_str:
+                                    try:
+                                        condition["value"] = re.compile(value_str)
+                                    except re.error as e:
+                                        rule_name = rule.get("rule_name", "Unnamed Rule")
+                                        logging.error(f"Invalid regex '{value_str}' in rule '{rule_name}': {e}")
+                                        ctx.log.error(f"Fiddleitm: Invalid regex '{value_str}' in rule '{rule_name}': {e}")
+                                        condition["value"] = None # Invalidate the regex
+                                else:
+                                    rule_name = rule.get("rule_name", "Unnamed Rule")
+                                    logging.warning(f"Empty regex value in rule '{rule_name}'. Condition skipped.")
+                                    ctx.log.warn(f"Fiddleitm: Empty regex value in rule '{rule_name}'. Skipping condition.")
+                    else:
+                        rule_name = rule.get("rule_name", "Unnamed Rule")
+                        logging.warning(f"Rule '{rule_name}' has 'conditions' that are not nested lists (expected for OR logic). Skipping this rule's conditions for compilation.")
+                        ctx.log.warn(f"Fiddleitm: Rule '{rule_name}' conditions not properly nested. Skipping compilation.")
+
+    def load_rules(self):
+        """Loads both main and local rules into memory."""
+        self.parsed_rules = [] # Clear existing rules before loading
+
+        # Conditionally load main rules based on internet connection status
+        if self._has_internet_connection: # Use the status determined in __init__
+            self.load_main_rules()
         else:
-            return False
+            ctx.log.info('Fiddleitm: Skipping main rules load (offline).')
+            logging.info('Fiddleitm: Skipping main rules load (offline).')
 
-    """ Mark flows """
-    def mark_flow(self, flow, rule_name, emoji_name):
-        # Play sound
-        print('\a', end = '')
+        self.load_local_rules()
+        logging.info(f"Total rules loaded: {len(self.parsed_rules)}")
+        ctx.log.info(f"Fiddleitm: Total rules loaded: {len(self.parsed_rules)}")
+
+    def load_main_rules(self):
+        """Downloads and loads main rules from a specified URL."""
+        logging.info(f"Loading main rules from {RULES_URL}...")
+        ctx.log.info(f"Fiddleitm: Loading main rules from {RULES_URL}...")
+        session = requests.Session()
+        session.trust_env = False # Ensure this is active for the session
         try:
-            # Print detection name in console
-            print(f"{rule_name} found in flow #{str(master.view.index(flow)+1)}")
-        except Exception:
-            logging.error("No view attribute in mitmdump")
-        # Mark flow in web UI
-        if emoji_name is not None:
-            flow.marked = emoji_name
-        else:
-            flow.marked = ":red_circle:"
-        flow.comment = rule_name
-        # Log events to file
-        if ctx.options.log_events:
-            # Assign default values
-            epochtime, friendlytime, comment, referer, ipaddress, servername, hostname = (value for value in ["", "",  "", "", "", "", ""])
-            if flow.timestamp_created is not None:
-                epochtime = str(int(flow.timestamp_created))
-                friendlytime = self.convert_epoch(int(flow.timestamp_created))
-                if epochtime is None:
-                    epochtime = "N/A"
-                    friendlytime = "N/A"
-                
-            if flow.server_conn.peername is not None:
-                ipaddress = flow.server_conn.peername[0]
-                if ipaddress is None:
-                    ipaddress = "N/A"
-           
-            if flow.request.host is not None:
-                hostname = flow.request.host
-                if hostname is None:
-                    hostname = "N/A"
-                
-            if flow.response is not None and flow.response.headers:            
-                servername = flow.response.headers.get("server")
-                if servername is None:
-                    servername = "N/A"
-            if flow.response is not None and flow.response.headers:
-                    referer = flow.request.headers.get("referer")
-                    if referer is None:
-                        referer = "N/A"
-            # Write to file
-            with open("rules.log", 'a') as rules_log:
-                rules_log.write(epochtime + "," + friendlytime + "," + ipaddress + "," + servername.replace(",", " ") + "," + hostname + "," + flow.request.pretty_url.replace(",", "_comma_") + "," + referer + "," + flow.comment + "\n")
-        # Check if anti-vm was detected
-        if "Fingerprinting" in flow.comment:
-            self.do_anti_vm = True
-        else:
-            self.do_anti_vm = False
+            response = session.get(RULES_URL, timeout=10) # Uses the session
+            response.raise_for_status()
 
-    """ flow request """
+            rules_data = json.loads(response.text)
+
+            if not isinstance(rules_data, list):
+                logging.error("Main rules file is not a list/array of rules. Skipping.")
+                ctx.log.error("Fiddleitm: Main rules file is not a list/array of rules. Skipping.")
+                return
+
+            self._compile_regexes(rules_data) # Compile regexes in the loaded data
+            self.parsed_rules.extend(rules_data) # Add them to the main list
+            logging.info(f" -> {len(rules_data)} main rules loaded successfully.")
+            ctx.log.info(f"Fiddleitm: -> {len(rules_data)} main rules loaded successfully.")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to download main rules from {RULES_URL}: {e}. Ensure URL is correct and accessible.")
+            ctx.log.error(f"Fiddleitm: Failed to download main rules from {RULES_URL}: {e}. Ensure URL is correct and accessible.")
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse main rules (invalid JSON format): {e}")
+            ctx.log.error(f"Fiddleitm: Failed to parse main rules (invalid JSON format): {e}")
+        except Exception as e:
+            logging.error(f"An unexpected error occurred loading main rules: {e}")
+            ctx.log.error(f"Fiddleitm: An unexpected error occurred loading main rules: {e}")
+
+
+    def load_local_rules(self):
+        """Loads rules from a local file (e.g., localrules.json)."""
+        logging.info(f"Loading local rules from {LOCAL_RULES_FILE}...")
+        ctx.log.info(f"Fiddleitm: Loading local rules from {LOCAL_RULES_FILE}...")
+        if os.path.isfile(LOCAL_RULES_FILE):
+            try:
+                with open(LOCAL_RULES_FILE, 'r', encoding='utf-8') as f:
+                    rules_data = json.load(f)
+
+                    if not isinstance(rules_data, list):
+                        logging.error("Local rules file is not a list/array of rules. Skipping.")
+                        ctx.log.error(f"Fiddleitm: Local rules file is not a list/array of rules. Skipping.")
+                        return
+
+                    self._compile_regexes(rules_data) # Compile regexes in the loaded data
+                    self.parsed_rules.extend(rules_data) # Add them to the main list
+                    logging.info(f" -> {len(rules_data)} local rules loaded successfully.")
+                    ctx.log.info(f"Fiddleitm: -> {len(rules_data)} local rules loaded successfully.")
+            except FileNotFoundError:
+                # This should ideally not happen due to os.path.isfile check, but good for robustness
+                logging.error(f"Local rules file '{LOCAL_RULES_FILE}' not found. This indicates a logic error.")
+                ctx.log.error(f"Fiddleitm: Local rules file '{LOCAL_RULES_FILE}' not found. This indicates a logic error.")
+            except json.JSONDecodeError as e:
+                logging.error(f"Failed to parse local rules (invalid JSON format): {e}")
+                ctx.log.error(f"Fiddleitm: Failed to parse local rules (invalid JSON format): {e}")
+            except Exception as e:
+                logging.error(f"An unexpected error occurred loading local rules: {e}")
+                ctx.log.error(f"Fiddleitm: An unexpected error occurred loading local rules: {e}")
+        else:
+            logging.info(f"No local rules file found at {LOCAL_RULES_FILE}. Skipping local rules load.")
+            ctx.log.info(f"Fiddleitm: No local rules file found at {LOCAL_RULES_FILE}. Skipping local rules load.")
+
+    def _get_target_data(self, key: str, flow: http.HTTPFlow):
+        """Helper to extract data from flow based on key."""
+        # Categorize keys by whether they need request or response
+        request_keys = {"full_url", "url_path", "url_host", "request_body", "host_ip"}
+        response_keys = {"response_body", "response_body_sha256", "status_code", "response_body_size"}
+
+        if key in request_keys or key.startswith("request_header_"):
+            # These are always available once a request object exists
+            pass
+        elif key in response_keys or key.startswith("response_header_"):
+            # These require a response to be present
+            if not flow.response:
+                return None # Data not available yet
+        
+        # Now, proceed with data extraction as before
+        if key == "full_url":
+            return flow.request.url
+        elif key == "url_path":
+            return flow.request.path
+        elif key == "url_host":
+            return flow.request.host
+        elif key == "host_ip":
+            return flow.server_conn.peername[0] if flow.server_conn and flow.server_conn.peername else "N/A"
+        elif key == "response_body":
+            if flow.response and flow.response.raw_content:
+                try:
+                    return flow.response.content.decode('utf-8', errors='ignore')
+                except Exception as e:
+                    logging.warning(f"Failed to decode response_body for rule check: {e}")
+                    return None
+            return None
+        elif key == "request_body":
+            if flow.request and flow.request.raw_content:
+                try:
+                    return flow.request.content.decode('utf-8', errors='ignore')
+                except Exception as e:
+                    logging.warning(f"Failed to decode request_body for rule check: {e}")
+                    return None
+            return None
+        elif key == "response_body_sha256":
+            if flow.response and flow.response.raw_content:
+                return sha256(flow.response.raw_content).hexdigest()
+            return None
+        elif key.startswith("request_header_"):
+            header_name = key.replace("request_header_", "")
+            return flow.request.headers.get(header_name, "")
+        elif key.startswith("response_header_"):
+            header_name = key.replace("response_header_", "")
+            return flow.response.headers.get(header_name, "")
+        elif key == "status_code":
+            return str(flow.response.status_code) if flow.response else None
+        elif key == "response_body_size":
+            if flow.response and flow.response.raw_content is not None:
+                return len(flow.response.raw_content) # Returns size in bytes
+            return 0 # Return 0 if no response or no content
+        else:
+            logging.warning(f"Unknown condition key '{key}'.")
+            ctx.log.warn(f"Fiddleitm: Unknown condition key '{key}'.")
+            return None
+
+    def _evaluate_single_condition(self, condition, flow: http.HTTPFlow):
+        """
+        Evaluates a single condition against the HTTP flow data.
+        Returns True if condition matches, False otherwise.
+        """
+        key = condition.get("key")
+        value = condition.get("value")
+        condition_type = condition.get("type")
+
+        if value is None:
+            logging.debug(f"Condition value is None for key '{key}'. Skipping.")
+            return False # Invalid condition
+
+        target_data = self._get_target_data(key, flow)
+
+        if target_data is None:
+            # Data source for this key was not available in the flow at this hook stage.
+            # E.g., trying to get response_body in a request hook.
+            return False
+
+        if condition_type == "string":
+            # Direct substring check. Case-sensitive.
+            return value in target_data
+        elif condition_type == "regex":
+            # 'value' should already be a compiled regex object from _compile_regexes
+            if isinstance(value, re.Pattern):
+                return value.search(target_data) is not None
+            else:
+                logging.error(f"Regex for key '{key}' was not compiled. Rule might be malformed.")
+                ctx.log.error(f"Fiddleitm: Regex for key '{key}' was not compiled. Rule might be malformed.")
+                return False
+        elif condition_type == "numeric_equals":
+            try:
+                # Ensure both are numeric for comparison
+                return float(target_data) == float(value) # Changed to '==' for equals
+            except (ValueError, TypeError):
+                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
+                ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
+                return False
+        elif condition_type == "numeric_greater_than":
+            try:
+                # Ensure both are numeric for comparison
+                return float(target_data) > float(value)
+            except (ValueError, TypeError):
+                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
+                ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
+                return False
+        elif condition_type == "numeric_lesser_than":
+            try:
+                # Ensure both are numeric for comparison
+                return float(target_data) < float(value) # Changed to '<' for lesser than
+            except (ValueError, TypeError):
+                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
+                ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
+                return False
+        else:
+            logging.warning(f"Unknown condition type '{condition_type}' for key '{key}'. Skipping condition.")
+            ctx.log.warn(f"Fiddleitm: Unknown condition type '{condition_type}' for key '{key}'.")
+            return False
+
+    def check_rules(self, flow: http.HTTPFlow):
+        """
+        Checks a given HTTP flow against all loaded rules,
+        implementing OR logic for nested condition groups.
+        If a rule matches, a message is printed to the mitmproxy console.
+        """
+        # Only process if the flow hasn't been marked by a rule already
+        if flow.comment: # Check if flow already has a comment (indicating it's been processed)
+            return
+
+        for rule in self.parsed_rules:
+            rule_name = rule.get("rule_name", "Unnamed Rule")
+            emoji_name = rule.get("emoji_name")
+            reference_url = rule.get("reference")
+            conditions_groups = rule.get("conditions", [])
+
+            rule_matched = False
+            # Iterate through each 'OR' group
+            for and_group in conditions_groups:
+                if not isinstance(and_group, list):
+                    logging.warning(f"Rule '{rule_name}' has a malformed condition group (not a list). Skipping this group.")
+                    ctx.log.warn(f"Fiddleitm: Rule '{rule_name}' has malformed condition group. Skipping.")
+                    continue
+
+                # Assume this AND group matches until a condition fails
+                group_matches_all_conditions = True
+                for condition in and_group:
+                    # Evaluate each single condition within this AND group
+                    if not self._evaluate_single_condition(condition, flow):
+                        group_matches_all_conditions = False
+                        break # If one condition in an AND group fails, the whole group fails
+
+                if group_matches_all_conditions:
+                    rule_matched = True
+                    break # If any AND group matches, the whole rule matches (OR logic)
+
+            if rule_matched:
+                ctx.log.alert('\a') # Bell sound for attention
+                # Construct the message including the reference URL if it exists
+                msg = f"Fiddleitm: Matched rule '{rule_name}' for {flow.request.pretty_url}"
+                if reference_url:
+                    msg += f"\nref:{reference_url}"
+
+                flow.comment = rule_name
+                if emoji_name:
+                    flow.marked = emoji_name
+                    ctx.log.info(f"{msg}")
+                else:
+                    flow.marked = ":red_circle:"
+                    ctx.log.info(msg)
+                
+                self._log_matched_rule(flow, rule_name)
+                # IMPORTANT: Break after the first match to prevent multiple marks/logs for one flow
+                break 
+
+    def _log_matched_rule(self, flow: http.HTTPFlow, rule_name: str):
+        """
+        Logs details of a matched rule to rules.log if the log_events option is enabled.
+        Opens the file, writes, and closes it for each entry to prevent locking.
+        """
+        if not self.log_events_enabled: # Use the instance variable updated by configure
+            return # Don't log if the option is not enabled
+
+        try:
+            epochtime = str(int(time.time()))
+            friendlytime = strftime("%Y-%m-%d %H:%M:%S", localtime())
+            ipaddress = flow.server_conn.peername[0] if flow.server_conn and flow.server_conn.peername else "N/A"
+
+            # Safely access response headers and other response-dependent data
+            servername = "N/A"
+            if flow.response and flow.response.headers:
+                servername = flow.response.headers.get("Server", "N/A")
+            
+            hostname = flow.request.host
+            referer = flow.request.headers.get("referer", "N/A")
+
+            # Replace commas in potentially problematic fields to avoid breaking CSV format
+            cleaned_servername = servername.replace(",", " ")
+            cleaned_url = flow.request.url.replace(",", "_comma_")
+            cleaned_referer = referer.replace(",", "_comma_")
+            # Ensure flow.comment is treated as a string before replacing
+            cleaned_comment = str(flow.comment).replace(",", "_comma_") if flow.comment else ""
+
+            # --- Critical Change: Open, Write, and Close here ---
+            with open("rules.log", "a", encoding="utf-8") as log_file:
+                log_file.write(
+                    f"{epochtime},{friendlytime},{ipaddress},{cleaned_servername},"
+                    f"{hostname},{cleaned_url},{cleaned_referer},{cleaned_comment}\n"
+                )
+            # The 'with' statement automatically flushes and closes the file,
+            # releasing the lock immediately after writing.
+            logging.debug(f"Logged event to rules.log for rule '{rule_name}'")
+        except Exception as e:
+            logging.error(f"Failed to write to rules.log for rule '{rule_name}': {e}")
+            ctx.log.error(f"Fiddleitm: Failed to write to rules.log for rule '{rule_name}': {e}")
+            
     def request(self, flow: http.HTTPFlow) -> None:
+        """
+        Mitmproxy event hook: Called when the proxy receives a request.
+        Used to modify requests based on configured options and check request-based rules.
+        """
         # Override user-agent if needed
-        if ctx.options.custom_user_agent:
-            flow.request.headers["user-agent"] = ctx.options.custom_user_agent
+        if self.custom_user_agent: # Use instance variable updated by configure
+            flow.request.headers["user-agent"] = self.custom_user_agent
+
         # Override referer if needed
-        if ctx.options.custom_referer:
-            flow.request.headers["referer"] = ctx.options.custom_referer
+        if self.custom_referer: # Use instance variable updated by configure
+            flow.request.headers["referer"] = self.custom_referer
+
         # Override accept-language if needed
-        if ctx.options.custom_accept_language:
-            flow.request.headers["accept-language"] = ctx.options.custom_accept_language
-        # Do anti-vm
-        if self.do_anti_vm:
-            flow.request.text = self.anti_vm(flow)
-            # Setting setting to false
-            self.do_anti_vm = False
+        if self.custom_accept_language: # Use instance variable updated by configure
+            flow.request.headers["accept-language"] = self.custom_accept_language
+
         # Drop images, videos and other large content (if option is enabled)
-        if ctx.options.traffic_lite:
-            if any(ext in flow.request.pretty_url.lower() for ext in (".gif", ".jpg", ".jpeg", ".png", ".webp", ".wav", ".mp4")):
+        if self.traffic_lite_enabled: # Use instance variable updated by configure
+            if any(ext in flow.request.pretty_url.lower() for ext in DROPPED_EXTENSIONS):
+                ctx.log.info(f"Traffic Lite: Killing flow for {flow.request.pretty_url}")
                 flow.kill()
+                return # No need to check rules if flow is killed
 
-    """ flow response """
-    def response(self, flow: http.HTTPFlow) -> None:
+        # Call check_rules in the request hook for request-based rules
         self.check_rules(flow)
-        if ctx.options.googleads:
-            self.googleads(flow)
-        
-    def googleads(self, flow):
-        base_directory = "googleads" 
-        if not os.path.exists(base_directory):
-            os.makedirs(base_directory)
-        # Check for Google CAPTCHA
-        if flow.comment == "Google CAPTCHA":
-            with open(f'{base_directory}/CAPTCHA.log', "w", encoding="utf-8") as file:
-                file.write(flow.response.text)
-        # Check URL for search query
-        if "search?q=" in flow.request.pretty_url and "/complete/search?q=" not in flow.request.pretty_url:
-            # Check if the HTML contains the data-rw attribute (Google Ad URL)
-            googleadurl = re.search(r'data-rw="(.*?)"', flow.response.text, flags=re.IGNORECASE)
-            if googleadurl: 
-                epochtime = str(int(flow.timestamp_created))
-                match = re.search(r"[?&]q=([^&]+)", flow.request.pretty_url)
-                query = match.group(1)
-                output = f"{query}-{epochtime}.html"
-                output_path = os.path.join(base_directory, output)
-                with open(output_path, "w", encoding="utf-8") as file:
-                    print(f"Writing Google Ads to: {output_path}")
-                    file.write(flow.response.text)
-                    print(f"File written successfully to: {output_path}")
-        
 
-    """ Begin commands """
-    """ For mitmweb, go to Options and select Display Command Bar.
-        It will add a command line at the bottom of the browser window.
-        Type commands like this: fiddleitm.commandname @all/@shown/@focus/@hidden/@marked/@unmarked
-    """
+    def response(self, flow: http.HTTPFlow) -> None:
+        """
+        Mitmproxy event hook: Called when the proxy receives a response.
+        This is where we trigger our rule checking for response-based rules, with content-type filtering.
+        """
+        # Ensure there's a response and content before proceeding
+        if not flow.response or not flow.response.content:
+            return
 
-    """ This command copies to the clipboard any URL that had a detection """
-    @command.command("fiddleitm.printurls")
-    def printurls(self, flows: Sequence[flow.Flow]) -> None:
-        self.traffic_summary = []
-        for f in flows:
-            if isinstance(f, http.HTTPFlow):
-                if f.comment != "":
-                    self.traffic_summary.append(f.request.pretty_url + "," + f.comment)
-        """ Check list is not empty """
-        if len(self.traffic_summary) > 0:
-            pyperclip.copy('\n'.join(self.traffic_summary))
-            logging.log(ALERT, "Copied detected flows to clipboard")
-        else:
-            logging.log(ALERT, "There was nothing to copy")
-        return None
-    
-    """ This command runs rules against the current flows"""
+        # If INCLUDED_CONTENT_TYPES is configured, only process flows matching those types.
+        if INCLUDED_CONTENT_TYPES:
+            content_type_full = flow.response.headers.get("Content-Type", "").lower()
+
+            # Extract only the MIME type part (e.g., "application/javascript" from "application/javascript; charset=utf-8")
+            content_type_base = content_type_full.split(';')[0].strip()
+
+            if content_type_base not in INCLUDED_CONTENT_TYPES:
+                return # Stop processing this flow
+
+        # Call check_rules in the response hook.
+        # The `check_rules` function has a safeguard (flow.comment)
+        # to prevent re-processing if a rule already matched in the request hook.
+        self.check_rules(flow)
+
     @command.command("fiddleitm.runrules")
     def runrules(self, flows: Sequence[flow.Flow]) -> None:
-        # call function to reload rules
-        self.rules = []
-        self.load_main_rules()
-        self.load_local_rules()
+        """
+        Reloads rules and re-evaluates them against the currently selected flows.
+        Usage: `:fiddleitm.runrules @tracked` (to run on all flows) or select flows
+        """
+        ctx.log.info("Fiddleitm: Reloading rules and re-running checks on selected flows...")
+        # Call load_rules, which now clears and reloads both main and local rules
+        self.load_rules()
+
+        rechecked_flows = 0
         for f in flows:
             if isinstance(f, http.HTTPFlow):
+                # We need to clear previous comments/marks if re-running
+                # Otherwise, old marks from previous rule matches will persist.
+                f.comment = None
+                f.marked = False # Or reset to None if you use None for unmarked
                 self.check_rules(f)
-        ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
-    
-    """ This command updates both main and local rules """
-    @command.command("fiddleitm.updaterules")
-    def updaterules(self) -> None:
-        # call function to reload rules
-        self.rules = []
-        self.load_main_rules()
-        self.load_local_rules()
-    
-    """ This command searches through flows using a regex or SHA256 """
-    @command.command("fiddleitm.search")
-    def search(
-        self,
-        flows: Sequence[flow.Flow],
-        searchquery: str,
-    ) -> None:
-        results = []
-        for f in flows:
-            if isinstance(f, http.HTTPFlow):
-                # Search within the flow's response headers
-                try:
-                    if f.response is not None and f.response.headers:            
-                        location = f.response.headers.get("location")
-                        if re.search(searchquery, location, flags=re.IGNORECASE):
-                            print(f"{searchquery} found in response headers for flow #{master.view.index(f)+1}")
-                            f.marked = ":purple_circle:"
-                            f.comment = "Found: " + searchquery
-                except Exception:
-                    logging.error("error while searching response headers")
-                        
-                # Search within the flow's response body
-                try:
-                    if f.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-                       f.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
-                        if f.response:
-                            if f.response.content:
-                                if "Content-Type" in f.response.headers:
-                                    if "text" in f.response.headers["Content-Type"] or \
-                                       "javascript" in f.response.headers["Content-Type"] or \
-                                       "json" in f.response.headers["Content-Type"]:
-                                        if re.search(searchquery, f.response.text, flags=re.IGNORECASE):
-                                            f.marked = ":purple_circle:"
-                                            f.comment = "Found: " + searchquery
-                                            results.append(f"{searchquery} found in response body for flow #{master.view.index(f)+1}")
-                except Exception:
-                    logging.error("error while searching response body")
-                    
-                # Search for SHA256
-                try:
-                    if f.response:
-                        if f.response.content:
-                            response_body_hash = sha256(f.response.raw_content).hexdigest()
-                            if searchquery == response_body_hash:
-                                f.marked = ":purple_circle:"
-                                f.comment = "Found: " + searchquery
-                                results.append(f"{searchquery} found in response body SHA256 for flow #{master.view.index(f)+1}")
-                except Exception:
-                    logging.error("error while searching for SHA256")
-                
-        if not results:
-            print("No result found")
-        else:
-            print("Search results:")
-            for result in results:
-                print(result)
-            ctx.master.addons.trigger(hooks.UpdateHook(flows))
-        
-    """ This command runs connect-the-dots"""
-    @command.command("fiddleitm.connect")
-    def connectdots(self, flows: Sequence[flow.Flow], last_flow: int) -> None:
-        print("Running connect-the-dots...")
-        connect_index = []
-        found_last_flow = False
-        for f in reversed(flows):
-            if isinstance(f, http.HTTPFlow):
-                flow_index = master.view.index(f)+1
-                # Get last flow hostname
-                if flow_index == last_flow:
-                    current_hostname = f.request.host
-                    # Add to list
-                    connect_index.append(flow_index)
-                    # Mark as found
-                    found_last_flow = True
-                
-                # Search previous sessions if we found the last flow
-                if found_last_flow:
-                    # Search within the flow's hostname
-                    try:
-                        if re.search(current_hostname, f.request.host, flags=re.IGNORECASE):
-                            # Add to list
-                            connect_index.append(flow_index)
-                    except Exception:
-                        logging.error("error connect-the-dots flow's hostname: " + f.request.pretty_url)
-                    
-                    # Search within the flow's response headers
-                    try:
-                        if f.response:
-                            if "location" in f.response.headers:
-                                location = f.response.headers.get("location")
-                                if re.search(current_hostname, location, flags=re.IGNORECASE):
-                                    # Assign new hostname to look for
-                                    current_hostname = f.request.host
-                                    # Add to list
-                                    connect_index.append(flow_index)                       
-                    except Exception:
-                        logging.error("error connect-the-dots response headers: " + f.request.pretty_url)
-                    # Search within the flow's response body
-                    try:
-                        if f.request.pretty_url != "https://github.com/jeromesegura/fiddleitm/blob/main/rules.txt" and \
-                           f.request.pretty_url != "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.txt":
-                            if f.response:
-                                if f.response.content:
-                                    if "Content-Type" in f.response.headers:
-                                        if "text" in f.response.headers["Content-Type"] or \
-                                           "javascript" in f.response.headers["Content-Type"] or \
-                                           "json" in f.response.headers["Content-Type"]:
-                                            if re.search(current_hostname, f.response.text, flags=re.IGNORECASE):
-                                                # Assign new hostname to look for
-                                                current_hostname = f.request.host
-                                                # Add to list
-                                                connect_index.append(flow_index)
-                    except Exception:
-                        logging.error("error connect-the-dots response body: " + f.request.pretty_url)
-                    
-        # Loop through flows again to assign numbers
-        number = 1
-        for f in flows:
-            # Check if the current flow index matches with the flow from our list
-            if isinstance(f, http.HTTPFlow):
-                flow_index = master.view.index(f)+1
-                if flow_index in connect_index:
-                    pattern = r'\(\d+\)'
-                    f.comment = f"({number}) {re.sub(pattern, '', f.comment)}"
-                    number +=1 
+                rechecked_flows += 1
+
+        ctx.log.info(f"Fiddleitm: Rechecked {rechecked_flows} HTTP flows.")
+        # Trigger an update hook to refresh the mitmproxy UI (web and console)
         ctx.master.addons.trigger(hooks.UpdateHook(flows))
-        print("Done!")
-        
-    """ This command clears comments for all flows"""
-    @command.command("fiddleitm.clear")
-    def clear(self, flows: Sequence[flow.Flow]) -> None:
-        for f in flows:
-            if isinstance(f, http.HTTPFlow):
-                f.comment = ''
-                f.marked = ''
-        ctx.master.addons.trigger(hooks.UpdateHook(flows)) 
-        
+
+    def done(self):
+        """Mitmproxy event hook: Called when the addon is unloaded."""
+        logging.info("Fiddleitm addon unloaded.")
+        ctx.log.info("Fiddleitm addon unloaded.")
+
 addons = [Fiddleitm()]
