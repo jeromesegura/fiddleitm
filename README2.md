@@ -1,5 +1,7 @@
 This document describes **`fiddleitm`**, a mitmproxy addon designed to identify malicious web traffic. It provides detailed information on its features, installation, usage, and configuration options.
 
+![image](https://github.com/user-attachments/assets/e34d4836-88aa-413b-b5b9-748ff2f763c2)
+
 ---
 
 ## Features
