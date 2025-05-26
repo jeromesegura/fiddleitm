@@ -53,7 +53,7 @@ from packaging.version import parse as parse_version # For robust version compar
 # IMPORTANT: Update this version manually when you make a new release on GitHub.
 # Ensure it matches the format of your GitHub release tags (e.g., "1.0.0" if your tag is "v1.0.0")
 # This is your current local version
-CURRENT_LOCAL_VERSION = "1.0" # Updated to reflect your current version in the example
+CURRENT_LOCAL_VERSION = "1.0.1" # Updated to reflect your current version in the example
 
 # GitHub repository details for update checking
 GITHUB_REPO_OWNER = "jeromesegura"
@@ -746,6 +746,15 @@ class Fiddleitm:
         # Trigger an update hook to refresh the mitmproxy UI (web and console)
         ctx.master.addons.trigger(hooks.UpdateHook(flows))
 
+    """ This command clears comments for all flows"""
+    @command.command("fiddleitm.clear")
+    def clear(self, flows: Sequence[flow.Flow]) -> None:
+        for f in flows:
+            if isinstance(f, http.HTTPFlow):
+                f.comment = ''
+                f.marked = ''
+        ctx.master.addons.trigger(hooks.UpdateHook(flows))
+    
     def done(self):
         """Mitmproxy event hook: Called when the addon is unloaded."""
         logging.info("Fiddleitm addon unloaded.")
