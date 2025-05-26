@@ -9,11 +9,11 @@ This document describes **`fiddleitm`**, a mitmproxy addon designed to identify 
 `fiddleitm` offers the following functionalities:
 
 * **Malicious Traffic Detection**: Inspects HTTP flows against a set of predefined and local rules to identify suspicious patterns.
-* **Custom Headers**: Allows modification of **`User-Agent`**, **`Referer`**, and **`Accept-Language`** headers for all requests.
-* **Traffic Filtering**: Includes a "traffic lite" mode to drop requests for common image and video file extensions, reducing noise.
 * **Rule Management**: Supports loading rules from a remote GitHub repository and a local JSON file (`localrules.json`).
 * **Real-time Alerts**: Notifies the user in the mitmproxy console when a rule matches a flow.
 * **Event Logging**: Option to log details of matched rules to a file named **`rules.log`** for later analysis.
+* **Custom Headers**: Allows modification of **`User-Agent`**, **`Referer`**, and **`Accept-Language`** headers for all requests.
+* **Traffic Filtering**: Includes a "traffic lite" mode to drop requests for common image and video file extensions, reducing noise.
 * **Self-Update**: Checks for and offers to install updates for `fiddleitm` directly from GitHub.
 * **On-demand Rule Re-evaluation**: Provides a mitmproxy command to reload rules and re-evaluate them against selected flows.
 
