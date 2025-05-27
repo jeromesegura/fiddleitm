@@ -1,5 +1,9 @@
 # Release History
 
+## May 27 2025: fiddleitm 1.0.2
+
+- Simplified version check to improve backwards compatibility
+
 ## May 25 2025: fiddleitm 1.0.1
 
 - Added option to clear comments from flows (fiddleitm.clear @all)
