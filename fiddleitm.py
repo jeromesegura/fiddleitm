@@ -47,13 +47,12 @@ from mitmproxy.addonmanager import Loader
 from mitmproxy.ctx import master
 from mitmproxy.log import ALERT # Keep ALERT for the update message
 from hashlib import sha256
-from packaging.version import parse as parse_version # For robust version comparison
 
 # --- Configuration ---
 # IMPORTANT: Update this version manually when you make a new release on GitHub.
 # Ensure it matches the format of your GitHub release tags (e.g., "1.0.0" if your tag is "v1.0.0")
 # This is your current local version
-CURRENT_LOCAL_VERSION = "1.0.1" # Updated to reflect your current version in the example
+CURRENT_LOCAL_VERSION = "1.0.2" # Updated to reflect your current version in the example
 
 # GitHub repository details for update checking
 GITHUB_REPO_OWNER = "jeromesegura"
@@ -126,6 +125,26 @@ DROPPED_EXTENSIONS = (
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+def _simple_version_to_tuple(version_str: str) -> tuple:
+    """
+    Parses a version string (e.g., '1.0.0', 'v0.5') into a tuple of integers
+    for comparison.
+    """
+    # Remove 'v' prefix if present (common in GitHub release tags)
+    if version_str.lower().startswith('v'):
+        version_str = version_str[1:]
+    
+    parts = []
+    for part in version_str.split('.'):
+        try:
+            parts.append(int(part))
+        except ValueError:
+            # If a part isn't an integer (e.g., 'beta', 'alpha'),
+            # treat it as 0 to ensure numeric parts are prioritized.
+            # This is a simplification; 'packaging' handles these gracefully.
+            parts.append(0) # Or could append string for lexicographical sort, but int is safer for numeric comparisons.
+    return tuple(parts)
 
 # --- Helper function to get latest GitHub version ---
 def get_latest_github_version(owner: str, repo: str) -> str | None:
@@ -294,8 +313,9 @@ class Fiddleitm:
 
         if version_online_str:
             try:
-                parsed_version_local = parse_version(version_local)
-                parsed_version_online = parse_version(version_online_str)
+                # Use the custom simple parser
+                parsed_version_local = _simple_version_to_tuple(version_local)
+                parsed_version_online = _simple_version_to_tuple(version_online_str)
 
                 if parsed_version_online > parsed_version_local:
                     ctx.log.alert('\a') # Bell sound for attention (now back to ALERT for purple)
