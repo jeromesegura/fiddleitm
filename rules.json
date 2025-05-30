@@ -502,7 +502,7 @@
     "emoji_name": ":credit_card:",
     "conditions": [
       [
-        { "key": "response_body", "value": "\\x5B\\x63\\x63\\x5F\\x6E\\x75\\x6D\\x62\\x65\\x72\\x5D", "type": "regex" }
+        { "key": "response_body", "value": "\\\\x5B\\\\x63\\\\x63\\\\x5F\\\\x6E\\\\x75\\\\x6D\\\\x62\\\\x65\\\\x72\\\\x5D", "type": "regex" }
       ]
     ]
   },
@@ -558,7 +558,7 @@
     "conditions": [
       [
         { "key": "response_body", "value": "fiza=", "type": "string" },
-        { "key": "response_body", "value": "cvv\\x22", "type": "regex" }
+        { "key": "response_body", "value": "cvv\\\\x22", "type": "regex" }
       ]
     ]
   },
