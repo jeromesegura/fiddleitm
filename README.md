@@ -35,10 +35,24 @@ To use `fiddleitm`, you need to have `mitmproxy` installed.
 
 Run `mitmweb`with the `-s` flag followed by the path to the `fiddleitm.py` file:
 
-* **mitmweb (web interface)**:
+* **Open fiddleitm**:
     ```bash
     mitmweb -s fiddleitm.py
     ```
+* **Open fiddleitm and autosave flows**:
+    ```bash
+    mitmweb -s .\fiddleitm.py --save-stream-file traffic.mitm
+    ```
+
+* **Open saved flows in viewer mode (capture disabled)**:
+    ```bash
+    mitmweb -s .\fiddleitm.py --no-server --rfile traffic.mitm
+    ```
+* **Open fiddleitm and replay saved flows**:
+    ```bash
+    mitmweb --scripts .\fiddleitm.py --server-replay [saved_flows] --server-replay-reuse --set connection_strategy=lazy
+    ```
+
 ---
 
 ## Configuration Options
@@ -123,7 +137,10 @@ Each rule in the JSON file is an object with the following structure:
 
 ## Commands
 
-`fiddleitm` provides one command to run rules manually (Options -> Display Command Bar.)
+To run commands, go to Options and check Display Command Bar.
 
 * **`:fiddleitm.runrules @all`**:
     Reloads all rules (both main and local) and re-evaluates them against all currentl HTTP flows. This is useful after modifying `localrules.json` to immediately see the effect without restarting mitmproxy.
+
+* **`:fiddleitm.clear @all`**:
+    Clears all comments and emojis.
