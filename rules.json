@@ -123,6 +123,24 @@
     ]
   },
   {
+    "rule_name": "ClickFix (generic)",
+    "emoji_name": ":robot:",
+    "conditions": [
+      [
+        {
+          "key": "response_body",
+          "value": "powershell",
+          "type": "string"
+        },
+        {
+          "key": "response_body",
+          "value": "cu%%%r%l%",
+          "type": "regex"
+        }
+      ]
+    ]
+  },
+  {
     "rule_name": "ClickFix (hCaptcha)",
     "reference": "https://www.cloudsek.com/blog/amos-variant-distributed-via-clickfix-in-spectrum-themed-dynamic-delivery-campaign-by-russian-speaking-hackers",
     "emoji_name": ":robot:",
