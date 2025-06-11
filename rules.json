@@ -1106,7 +1106,7 @@
       [
         {
           "key": "response_body",
-          "value": "var filename=\"Update.js\"",
+          "value": "var filePlain=window.atob",
           "type": "string"
         },
         {
