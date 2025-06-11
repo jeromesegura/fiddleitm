@@ -134,7 +134,7 @@
         },
         {
           "key": "response_body",
-          "value": "cu%%%r%l%|c\\^u\\^r",
+          "value": "cu%%%r%l%|c\\^u\\^r|c\\^ur\\^l",
           "type": "regex"
         }
       ]
