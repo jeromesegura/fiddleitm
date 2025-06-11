@@ -122,19 +122,19 @@
       ]
     ]
   },
-  {
+{
     "rule_name": "ClickFix (generic)",
     "emoji_name": ":robot:",
     "conditions": [
       [
         {
           "key": "response_body",
-          "value": "powershell",
-          "type": "string"
+          "value": "powershell|cmd.exe",
+          "type": "regex"
         },
         {
           "key": "response_body",
-          "value": "cu%%%r%l%",
+          "value": "cu%%%r%l%|c\\^u\\^r",
           "type": "regex"
         }
       ]
