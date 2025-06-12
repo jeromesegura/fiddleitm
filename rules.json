@@ -122,7 +122,7 @@
       ]
     ]
   },
-{
+  {
     "rule_name": "ClickFix (generic)",
     "emoji_name": ":robot:",
     "conditions": [
@@ -596,6 +596,36 @@
         {
           "key": "response_body",
           "value": "/*",
+          "type": "string"
+        }
+      ]
+    ]
+  },
+  {
+    "rule_name": "Greatness (stager)",
+    "reference": null,
+    "comments": "Formatted output from template scripts/stager.min.js",
+    "emoji_name": ":phish:",
+    "conditions": [
+      [
+        {
+          "key": "response_body",
+          "value": "<html dir=\"ltr\"",
+          "type": "string"
+        },
+        {
+          "key": "response_body",
+          "value": "/code-2fa-mfa1",
+          "type": "string"
+        },
+        {
+          "key": "response_body",
+          "value": "/code-2fa-mfa2",
+          "type": "string"
+        },
+        {
+          "key": "response_body",
+          "value": "/code-2fa-sms",
           "type": "string"
         }
       ]
