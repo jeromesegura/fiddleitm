@@ -160,20 +160,6 @@
     ]
   },
   {
-    "rule_name": "ClickFix (step1)",
-    "reference": null,
-    "emoji_name": ":fish:",
-    "conditions": [
-      [
-        {
-          "key": "response_body",
-          "value": "QWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O",
-          "type": "string"
-        }
-      ]
-    ]
-  },
-  {
     "rule_name": "ClickFix CF",
     "reference": null,
     "emoji_name": null,
