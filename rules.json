@@ -1398,6 +1398,60 @@
     ]
   },
   {
+    "rule_name": "voidProxy (cookie)",
+    "reference": null,
+    "emoji_name": ":phish:",
+    "conditions": [
+      [
+        {
+          "key": "response_header_set-cookie",
+          "type": "string",
+          "value": "__xhooknstate="
+        }
+      ],
+      [
+        {
+          "key": "request_header_cookie",
+          "type": "string",
+          "value": "__xhooknstate="
+        }
+      ],
+      [
+        {
+          "key": "response_header_set-cookie",
+          "type": "string",
+          "value": "__xxdomstate="
+        }
+      ],
+      [
+        {
+          "key": "request_header_cookie",
+          "type": "string",
+          "value": "__xxdomstate="
+        }
+      ]
+    ]
+  },
+  {
+    "rule_name": "voidProxy (iframe)",
+    "reference": null,
+    "emoji_name": ":phish:",
+    "conditions": [
+      [
+        {
+          "key": "full_url",
+          "type": "string",
+          "value": "=aHR0cHM6Ly9"
+        },
+        {
+          "key": "response_body",
+          "type": "string",
+          "value": "?authvp="
+        }
+      ]
+    ]
+  },
+  {
     "rule_name": "wrapperz skimmer",
     "reference": null,
     "emoji_name": null,
