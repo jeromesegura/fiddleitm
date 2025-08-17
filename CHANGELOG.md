@@ -1,5 +1,10 @@
 # Release History
 
+## August 17 2025: fiddleitm 1.0.3
+
+- Improved rules parsing based on request or response phases
+  (previously the sames rules where parsed twice: on request and response)
+
 ## May 27 2025: fiddleitm 1.0.2
 
 - Simplified version check to improve backwards compatibility
