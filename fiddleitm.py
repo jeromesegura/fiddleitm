@@ -1,25 +1,10 @@
 """
-This is an addon for mitmproxy that inspects flows and
-identifies malicious web traffic.
+This is mitmproxy addon designed to identify malicious web traffic
 
 GitHub: https://github.com/jeromesegura/fiddleitm
 
 Usage:
-    mitmproxy -s fiddleitm.py
     mitmweb -s fiddleitm.py
-    mitmdump -s fiddleitm.py
-
-Options:
-
- modify default user-agent with your own --set custom_user_agent=""
-
- modify default referer with your own --set custom_referer=""
-
- modify default accept-language with your own --set custom_accept_language=""
-
- log events for rules that match flows (writes to rules.log) --set log_events=true
-
- add upstream proxy --mode upstream:http://proxyhost:port --upstream-auth username:password
 """
 
 import os
@@ -45,14 +30,13 @@ from mitmproxy import flow
 from mitmproxy import hooks
 from mitmproxy.addonmanager import Loader
 from mitmproxy.ctx import master
-from mitmproxy.log import ALERT # Keep ALERT for the update message
+from mitmproxy.log import ALERT
+from mitmproxy import io
 from hashlib import sha256
 
 # --- Configuration ---
-# IMPORTANT: Update this version manually when you make a new release on GitHub.
-# Ensure it matches the format of your GitHub release tags (e.g., "1.0.0" if your tag is "v1.0.0")
 # This is your current local version
-CURRENT_LOCAL_VERSION = "1.0.2" # Updated to reflect your current version in the example
+CURRENT_LOCAL_VERSION = "1.0.3"
 
 # GitHub repository details for update checking
 GITHUB_REPO_OWNER = "jeromesegura"
@@ -60,7 +44,6 @@ GITHUB_REPO_NAME = "fiddleitm"
 
 RULES_URL = "https://raw.githubusercontent.com/jeromesegura/fiddleitm/main/rules.json"
 LOCAL_RULES_FILE = "localrules.json" # Name of your local rules file
-LOG_LEVEL = logging.INFO # Adjust to logging.DEBUG for more verbose output
 
 # --- Content Filtering Configuration ---
 # Only content types explicitly listed here will be processed by rules.
@@ -121,11 +104,6 @@ DROPPED_EXTENSIONS = (
     ".eot",     # Embedded OpenType
 )
 
-# --- Setup Logging ---
-logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-
 def _simple_version_to_tuple(version_str: str) -> tuple:
     """
     Parses a version string (e.g., '1.0.0', 'v0.5') into a tuple of integers
@@ -142,15 +120,13 @@ def _simple_version_to_tuple(version_str: str) -> tuple:
         except ValueError:
             # If a part isn't an integer (e.g., 'beta', 'alpha'),
             # treat it as 0 to ensure numeric parts are prioritized.
-            # This is a simplification; 'packaging' handles these gracefully.
-            parts.append(0) # Or could append string for lexicographical sort, but int is safer for numeric comparisons.
+            parts.append(0)
     return tuple(parts)
 
 # --- Helper function to get latest GitHub version ---
 def get_latest_github_version(owner: str, repo: str) -> str | None:
     """
     Fetches the latest *release tag name* from a GitHub repository using the API.
-    Uses a requests.Session with trust_env=False for compatibility within mitmproxy.
     """
     session = requests.Session()
     # Crucial for mitmproxy environments to avoid inheriting system proxy
@@ -204,10 +180,8 @@ class Fiddleitm:
             self.check_fiddleitm_update(self.version_local)
         else:
             ctx.log.info('Offline mode: No internet connection detected.')
-            logging.info('Offline mode: No internet connection detected.')
 
-        logging.info("Fiddleitm addon initialized.")
-        ctx.log.info("Fiddleitm addon initialized (mitmproxy context).")
+        ctx.log.info("Fiddleitm addon initialized")
 
         self.load_rules() # load_rules will handle all rule loading, including main and local
 
@@ -266,12 +240,10 @@ class Fiddleitm:
             ctx.log.info(f"fiddleitm: Custom Referer set to: {self.custom_referer}")
         if "custom_accept_language" in updated:
             self.custom_accept_language = ctx.options.custom_accept_language
-            ctx.log.info(f"fiddleitm: Custom Accept-Language set to: {self.custom_accept_language}")
-        
+            ctx.log.info(f"fiddleitm: Custom Accept-Language set to: {self.custom_accept_language}")       
         if "log_events" in updated:
             self.log_events_enabled = ctx.options.log_events
-            ctx.log.info(f"fiddleitm: Event logging {'enabled' if self.log_events_enabled else 'disabled'}.")
-        
+            ctx.log.info(f"fiddleitm: Event logging {'enabled' if self.log_events_enabled else 'disabled'}.")      
         if "traffic_lite" in updated:
             self.traffic_lite_enabled = ctx.options.traffic_lite
             ctx.log.info(f"fiddleitm: Traffic Lite mode {'enabled' if self.traffic_lite_enabled else 'disabled'}.")
@@ -287,7 +259,6 @@ class Fiddleitm:
             ctx.log.info(f'->> The latest version for mitmproxy is: {mitmproxy_version}')
         except requests.exceptions.RequestException as e:
             ctx.log.warn(f"Failed to check mitmproxy version: {e}")
-            logging.warning(f"Failed to check mitmproxy version: {e}")
 
     def internet_connection(self) -> bool:
         """ Check for internet connection """
@@ -297,7 +268,7 @@ class Fiddleitm:
             response.raise_for_status()
             return True
         except requests.exceptions.RequestException as e:
-            logging.debug(f"Internet connection check failed: {e}")
+            ctx.log.debug(f"Internet connection check failed: {e}")
             return False
         finally:
             if 'no_proxy' in os.environ:
@@ -326,8 +297,7 @@ class Fiddleitm:
                     ctx.log.alert('Fiddleitm will attempt to auto-reload after update. If issues persist, please restart mitmproxy.')
                     ctx.log.alert(f'---')
 
-                    # Prompt for download - this will block mitmproxy until answered.
-                    # It will appear in the terminal where mitmproxy/mitmweb is run.
+                    # Prompt for download - this will block mitmproxy until answered
                     answer = input('Would you like to install it now? (y/n)\n')
                     if answer.lower() == "y":
                         ctx.log.info(f"Installing v.{version_online_str}...")
@@ -367,8 +337,6 @@ class Fiddleitm:
     def _compile_regexes(self, rules_list):
         """
         Helper method to compile regex strings within the loaded rules.
-        Modifies rules_list in place.
-        Now handles nested conditions for OR logic.
         """
         for rule in rules_list:
             if "conditions" in rule and isinstance(rule["conditions"], list):
@@ -384,16 +352,13 @@ class Fiddleitm:
                                         condition["value"] = re.compile(value_str)
                                     except re.error as e:
                                         rule_name = rule.get("rule_name", "Unnamed Rule")
-                                        logging.error(f"Invalid regex '{value_str}' in rule '{rule_name}': {e}")
                                         ctx.log.error(f"Fiddleitm: Invalid regex '{value_str}' in rule '{rule_name}': {e}")
                                         condition["value"] = None # Invalidate the regex
                                 else:
                                     rule_name = rule.get("rule_name", "Unnamed Rule")
-                                    logging.warning(f"Empty regex value in rule '{rule_name}'. Condition skipped.")
                                     ctx.log.warn(f"Fiddleitm: Empty regex value in rule '{rule_name}'. Skipping condition.")
                     else:
                         rule_name = rule.get("rule_name", "Unnamed Rule")
-                        logging.warning(f"Rule '{rule_name}' has 'conditions' that are not nested lists (expected for OR logic). Skipping this rule's conditions for compilation.")
                         ctx.log.warn(f"Fiddleitm: Rule '{rule_name}' conditions not properly nested. Skipping compilation.")
 
     def load_rules(self):
@@ -405,15 +370,12 @@ class Fiddleitm:
             self.load_main_rules()
         else:
             ctx.log.info('Fiddleitm: Skipping main rules load (offline).')
-            logging.info('Fiddleitm: Skipping main rules load (offline).')
 
         self.load_local_rules()
-        logging.info(f"Total rules loaded: {len(self.parsed_rules)}")
         ctx.log.info(f"Fiddleitm: Total rules loaded: {len(self.parsed_rules)}")
 
     def load_main_rules(self):
         """Downloads and loads main rules from a specified URL."""
-        logging.info(f"Loading main rules from {RULES_URL}...")
         ctx.log.info(f"Fiddleitm: Loading main rules from {RULES_URL}...")
         session = requests.Session()
         session.trust_env = False # Ensure this is active for the session
@@ -424,28 +386,22 @@ class Fiddleitm:
             rules_data = json.loads(response.text)
 
             if not isinstance(rules_data, list):
-                logging.error("Main rules file is not a list/array of rules. Skipping.")
                 ctx.log.error("Fiddleitm: Main rules file is not a list/array of rules. Skipping.")
                 return
 
             self._compile_regexes(rules_data) # Compile regexes in the loaded data
             self.parsed_rules.extend(rules_data) # Add them to the main list
-            logging.info(f" -> {len(rules_data)} main rules loaded successfully.")
             ctx.log.info(f"Fiddleitm: -> {len(rules_data)} main rules loaded successfully.")
         except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to download main rules from {RULES_URL}: {e}. Ensure URL is correct and accessible.")
             ctx.log.error(f"Fiddleitm: Failed to download main rules from {RULES_URL}: {e}. Ensure URL is correct and accessible.")
         except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse main rules (invalid JSON format): {e}")
             ctx.log.error(f"Fiddleitm: Failed to parse main rules (invalid JSON format): {e}")
         except Exception as e:
-            logging.error(f"An unexpected error occurred loading main rules: {e}")
             ctx.log.error(f"Fiddleitm: An unexpected error occurred loading main rules: {e}")
 
 
     def load_local_rules(self):
         """Loads rules from a local file (e.g., localrules.json)."""
-        logging.info(f"Loading local rules from {LOCAL_RULES_FILE}...")
         ctx.log.info(f"Fiddleitm: Loading local rules from {LOCAL_RULES_FILE}...")
         if os.path.isfile(LOCAL_RULES_FILE):
             try:
@@ -453,26 +409,20 @@ class Fiddleitm:
                     rules_data = json.load(f)
 
                     if not isinstance(rules_data, list):
-                        logging.error("Local rules file is not a list/array of rules. Skipping.")
                         ctx.log.error(f"Fiddleitm: Local rules file is not a list/array of rules. Skipping.")
                         return
 
                     self._compile_regexes(rules_data) # Compile regexes in the loaded data
                     self.parsed_rules.extend(rules_data) # Add them to the main list
-                    logging.info(f" -> {len(rules_data)} local rules loaded successfully.")
                     ctx.log.info(f"Fiddleitm: -> {len(rules_data)} local rules loaded successfully.")
             except FileNotFoundError:
                 # This should ideally not happen due to os.path.isfile check, but good for robustness
-                logging.error(f"Local rules file '{LOCAL_RULES_FILE}' not found. This indicates a logic error.")
                 ctx.log.error(f"Fiddleitm: Local rules file '{LOCAL_RULES_FILE}' not found. This indicates a logic error.")
             except json.JSONDecodeError as e:
-                logging.error(f"Failed to parse local rules (invalid JSON format): {e}")
                 ctx.log.error(f"Fiddleitm: Failed to parse local rules (invalid JSON format): {e}")
             except Exception as e:
-                logging.error(f"An unexpected error occurred loading local rules: {e}")
                 ctx.log.error(f"Fiddleitm: An unexpected error occurred loading local rules: {e}")
         else:
-            logging.info(f"No local rules file found at {LOCAL_RULES_FILE}. Skipping local rules load.")
             ctx.log.info(f"Fiddleitm: No local rules file found at {LOCAL_RULES_FILE}. Skipping local rules load.")
 
     def _get_target_data(self, key: str, flow: http.HTTPFlow):
@@ -503,7 +453,7 @@ class Fiddleitm:
                 try:
                     return flow.response.content.decode('utf-8', errors='ignore')
                 except Exception as e:
-                    logging.warning(f"Failed to decode response_body for rule check: {e}")
+                    ctx.log.warn(f"Failed to decode response_body for rule check: {e}")
                     return None
             return None
         elif key == "request_body":
@@ -511,7 +461,7 @@ class Fiddleitm:
                 try:
                     return flow.request.content.decode('utf-8', errors='ignore')
                 except Exception as e:
-                    logging.warning(f"Failed to decode request_body for rule check: {e}")
+                    ctx.log.warn(f"Failed to decode request_body for rule check: {e}")
                     return None
             return None
         elif key == "response_body_sha256":
@@ -531,7 +481,6 @@ class Fiddleitm:
                 return len(flow.response.raw_content) # Returns size in bytes
             return 0 # Return 0 if no response or no content
         else:
-            logging.warning(f"Unknown condition key '{key}'.")
             ctx.log.warn(f"Fiddleitm: Unknown condition key '{key}'.")
             return None
 
@@ -545,7 +494,7 @@ class Fiddleitm:
         condition_type = condition.get("type")
 
         if value is None:
-            logging.debug(f"Condition value is None for key '{key}'. Skipping.")
+            ctx.log.debug(f"Condition value is None for key '{key}'. Skipping.")
             return False # Invalid condition
 
         target_data = self._get_target_data(key, flow)
@@ -556,14 +505,13 @@ class Fiddleitm:
             return False
 
         if condition_type == "string":
-            # Direct substring check. Case-sensitive.
+            # Direct substring check. Case-sensitive
             return value in target_data
         elif condition_type == "regex":
             # 'value' should already be a compiled regex object from _compile_regexes
             if isinstance(value, re.Pattern):
                 return value.search(target_data) is not None
             else:
-                logging.error(f"Regex for key '{key}' was not compiled. Rule might be malformed.")
                 ctx.log.error(f"Fiddleitm: Regex for key '{key}' was not compiled. Rule might be malformed.")
                 return False
         elif condition_type == "numeric_equals":
@@ -571,7 +519,6 @@ class Fiddleitm:
                 # Ensure both are numeric for comparison
                 return float(target_data) == float(value) # Changed to '==' for equals
             except (ValueError, TypeError):
-                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
                 ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
                 return False
         elif condition_type == "numeric_greater_than":
@@ -579,7 +526,6 @@ class Fiddleitm:
                 # Ensure both are numeric for comparison
                 return float(target_data) > float(value)
             except (ValueError, TypeError):
-                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
                 ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
                 return False
         elif condition_type == "numeric_lesser_than":
@@ -587,18 +533,15 @@ class Fiddleitm:
                 # Ensure both are numeric for comparison
                 return float(target_data) < float(value) # Changed to '<' for lesser than
             except (ValueError, TypeError):
-                logging.warning(f"Invalid numeric comparison for key '{key}'. Target data '{target_data}' or value '{value}' is not numeric.")
                 ctx.log.warn(f"Fiddleitm: Invalid numeric comparison for key '{key}'.")
                 return False
         else:
-            logging.warning(f"Unknown condition type '{condition_type}' for key '{key}'. Skipping condition.")
             ctx.log.warn(f"Fiddleitm: Unknown condition type '{condition_type}' for key '{key}'.")
             return False
 
-    def check_rules(self, flow: http.HTTPFlow):
+    def check_rules(self, flow: http.HTTPFlow, phase: str):
         """
         Checks a given HTTP flow against all loaded rules,
-        implementing OR logic for nested condition groups.
         If a rule matches, a message is printed to the mitmproxy console.
         """
         # Only process if the flow hasn't been marked by a rule already
@@ -611,11 +554,29 @@ class Fiddleitm:
             reference_url = rule.get("reference")
             conditions_groups = rule.get("conditions", [])
 
+            # Skip rules that don't match the current phase.
+            # This prevents the function from attempting to evaluate
+            # response-based rules in the request phase, and vice-versa.
+            has_request_condition = any(
+                c.get("key").startswith(("full_url", "url_path", "url_host", "request_body", "host_ip", "request_header_"))
+                for and_group in conditions_groups
+                for c in and_group
+            )
+            has_response_condition = any(
+                c.get("key").startswith(("response_body", "response_body_sha256", "response_header_")) or c.get("key") == "status_code"
+                for and_group in conditions_groups
+                for c in and_group
+            )
+
+            if phase == 'request' and has_response_condition:
+                continue
+            if phase == 'response' and has_request_condition and not has_response_condition:
+                continue
+
             rule_matched = False
             # Iterate through each 'OR' group
             for and_group in conditions_groups:
                 if not isinstance(and_group, list):
-                    logging.warning(f"Rule '{rule_name}' has a malformed condition group (not a list). Skipping this group.")
                     ctx.log.warn(f"Fiddleitm: Rule '{rule_name}' has malformed condition group. Skipping.")
                     continue
 
@@ -686,9 +647,8 @@ class Fiddleitm:
                 )
             # The 'with' statement automatically flushes and closes the file,
             # releasing the lock immediately after writing.
-            logging.debug(f"Logged event to rules.log for rule '{rule_name}'")
+            ctx.log.debug(f"Logged event to rules.log for rule '{rule_name}'")
         except Exception as e:
-            logging.error(f"Failed to write to rules.log for rule '{rule_name}': {e}")
             ctx.log.error(f"Fiddleitm: Failed to write to rules.log for rule '{rule_name}': {e}")
             
     def request(self, flow: http.HTTPFlow) -> None:
@@ -696,6 +656,10 @@ class Fiddleitm:
         Mitmproxy event hook: Called when the proxy receives a request.
         Used to modify requests based on configured options and check request-based rules.
         """
+        # Ensure the flow is an HTTP flow before proceeding
+        if not isinstance(flow, http.HTTPFlow):
+            return
+        
         # Override user-agent if needed
         if self.custom_user_agent: # Use instance variable updated by configure
             flow.request.headers["user-agent"] = self.custom_user_agent
@@ -716,13 +680,17 @@ class Fiddleitm:
                 return # No need to check rules if flow is killed
 
         # Call check_rules in the request hook for request-based rules
-        self.check_rules(flow)
+        self.check_rules(flow, phase='request')
 
     def response(self, flow: http.HTTPFlow) -> None:
         """
         Mitmproxy event hook: Called when the proxy receives a response.
         This is where we trigger our rule checking for response-based rules, with content-type filtering.
         """
+        # Ensure the flow is an HTTP flow before proceeding
+        if not isinstance(flow, http.HTTPFlow):
+            return
+        
         # Ensure there's a response and content before proceeding
         if not flow.response or not flow.response.content:
             return
@@ -740,7 +708,7 @@ class Fiddleitm:
         # Call check_rules in the response hook.
         # The `check_rules` function has a safeguard (flow.comment)
         # to prevent re-processing if a rule already matched in the request hook.
-        self.check_rules(flow)
+        self.check_rules(flow, phase='response')
 
     @command.command("fiddleitm.runrules")
     def runrules(self, flows: Sequence[flow.Flow]) -> None:
@@ -753,14 +721,42 @@ class Fiddleitm:
         self.load_rules()
 
         rechecked_flows = 0
+        
+        # First pass: check for request-based rules
+        ctx.log.info("Fiddleitm: Running request-based rules...")
         for f in flows:
             if isinstance(f, http.HTTPFlow):
-                # We need to clear previous comments/marks if re-running
-                # Otherwise, old marks from previous rule matches will persist.
+                # Clear previous marks and comments to allow a fresh evaluation
                 f.comment = None
-                f.marked = False # Or reset to None if you use None for unmarked
-                self.check_rules(f)
+                f.marked = False
+                # Call check_rules for the 'request' phase
+                self.check_rules(f, phase='request')
                 rechecked_flows += 1
+
+        # Second pass: check for response-based rules
+        ctx.log.info("Fiddleitm: Running response-based rules...")
+        for f in flows:
+            if  isinstance(f, http.HTTPFlow) and f.response and f.response.content:
+                # If INCLUDED_CONTENT_TYPES is configured, only process flows matching those types.
+                if INCLUDED_CONTENT_TYPES:
+                    print(f"Checking {f.request.url}...")
+                    content_type_full = f.response.headers.get("Content-Type", "").lower()
+
+                    # Extract only the MIME type part (e.g., "application/javascript" from "application/javascript; charset=utf-8")
+                    content_type_base = content_type_full.split(';')[0].strip()
+                    print(content_type_base)
+
+                    if content_type_base in INCLUDED_CONTENT_TYPES:                
+                        print(f"Processing {f.request.url} with restricted content types")
+                        # This second call is only for flows that were NOT matched in the first pass
+                        self.check_rules(f, phase='response')
+                    else:
+                        print(f"Ignore this flow")
+                
+                else:
+                    print(f"Processing {f.request.url}")
+                    # This second call is only for flows that were NOT matched in the first pass
+                    self.check_rules(f, phase='response') 
 
         ctx.log.info(f"Fiddleitm: Rechecked {rechecked_flows} HTTP flows.")
         # Trigger an update hook to refresh the mitmproxy UI (web and console)
@@ -775,9 +771,37 @@ class Fiddleitm:
                 f.marked = ''
         ctx.master.addons.trigger(hooks.UpdateHook(flows))
     
+    @command.command("fiddleitm.save")
+    def save_flows(self, flows: Sequence[flow.Flow], filename: str):
+        """
+        Saves the given flows to a file
+        Usage: fiddleitm.save [flows] <filename>
+        """
+        if not filename:
+            ctx.log.info("Usage: fiddleitm.save [flows] <filename>")
+            ctx.log.info("Example: :fiddleitm.save @all my_session.mitm")
+            ctx.log.info("Example: :fiddleitm.save my_selected_flows.mitm")
+            return
+
+        if not flows:
+            ctx.log.info("Fiddleitm: No flows provided. Please select flows or use '@all'.")
+            return
+
+        try:
+            # Use os.path.expanduser to resolve '~' in filenames
+            with open(os.path.expanduser(filename), "wb") as f:
+                writer = io.FlowWriter(f) 
+                
+                for flow_obj in flows:
+                    writer.add(flow_obj)
+            ctx.log.info(f"Fiddleitm: Successfully saved {len(flows)} flows to '{filename}'")
+        except IOError as e:
+            ctx.log.error(f"Fiddleitm: Could not write to file '{filename}': {e}")
+        except Exception as e:
+            ctx.log.error(f"Fiddleitm: An unexpected error occurred while saving flows: {e}")
+    
     def done(self):
         """Mitmproxy event hook: Called when the addon is unloaded."""
-        logging.info("Fiddleitm addon unloaded.")
         ctx.log.info("Fiddleitm addon unloaded.")
 
 addons = [Fiddleitm()]
